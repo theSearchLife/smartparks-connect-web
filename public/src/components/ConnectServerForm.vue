@@ -25,17 +25,18 @@
         trigger: 'blur',
       }">
         <el-input v-model="formServer.api_key">
-          <template #append>
-            <el-popover placement="bottom" title="Get User's ApiKey" :width="200" trigger="hover"
-              content="Click this button, you can obtain apikey through the user's email/password">
-              <template #reference>
-                <el-button :icon="Key" @click="config.dialogFormVisible = true" style="width:60px"></el-button>
-              </template>
-            </el-popover>
-
-          </template>
+          
         </el-input>
 
+
+      </el-form-item>
+      <el-form-item>
+        <el-popover placement="bottom" title="Get User's ApiKey" :width="200" trigger="hover"
+              content="Click this button, you can obtain apikey through the user's email/password">
+              <template #reference>
+                <el-button type="danger" :icon="Key" @click="config.dialogFormVisible = true">GetUserApiKey</el-button>
+              </template>
+            </el-popover>
       </el-form-item>
 
 

@@ -10,6 +10,7 @@
     </template>
     <el-form :model="formRequest" ref="formRef">
       <el-row>
+        <el-alert title="only activated devices will show in the list" type="success" style="margin-bottom: 10px;"/>
         <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
           <el-form-item label="Select Device:" prop="device_id" :rules="{
             required: true,
