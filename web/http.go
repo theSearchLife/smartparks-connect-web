@@ -1,18 +1,25 @@
 package web
 
 import (
+	"github.com/SmartParksOrg/smartparks-connect-web/device_template"
+	"github.com/SmartParksOrg/smartparks-connect-web/grpc_client"
 	"log"
 	"net/http"
 )
 
-func StartHttpServer() {
+func StartHttpServer(client *grpc_client.GrpcClient, template *device_template.TemplateManager) {
+	handle := Handler{
+		grpcClient:      client,
+		templateManager: template,
+	}
+	http.Handle("/api/v1/login", cors(http.HandlerFunc(handle.handleLogin)))
+	http.Handle("/api/v1/device/queue", cors(http.HandlerFunc(handle.handleAPI)))
+	http.Handle("/api/v1/list", cors(http.HandlerFunc(handle.handleList)))
+	http.Handle("/api/v1/template/list", cors(http.HandlerFunc(handle.handleTemplateList)))
 
-	http.Handle("/api/v1/login", cors(http.HandlerFunc(handleLogin)))
-	http.Handle("/api/v1/device/queue", cors(http.HandlerFunc(handleAPI)))
-	http.Handle("/api/v1/list", cors(http.HandlerFunc(handleList)))
-
+	http.Handle("/assets/device_template/", http.StripPrefix("/assets/device_template/", http.FileServer(http.Dir("template_files"))))
 	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("public/dist/assets"))))
-	http.HandleFunc("/", handleRoot)
+	http.HandleFunc("/", handle.handleRoot)
 	log.Println("http server runing in port : 8881")
 	log.Fatal(http.ListenAndServe(":8881", nil))
 }
