@@ -30,24 +30,30 @@ type DeviceTemplate struct {
 	Ports     json.RawMessage `json:"ports"`
 }
 
-var Templates = make(map[string]*DeviceTemplate)
-
-func init() {
-	scanTemplateDir()
+type TemplateManager struct {
+	templates map[string]*DeviceTemplate
 }
 
-func scanTemplateDir() {
+func NewTemplateManager() *TemplateManager {
+	return &TemplateManager{templates: make(map[string]*DeviceTemplate)}
+}
+
+func (t *TemplateManager) GetTemplates() map[string]*DeviceTemplate {
+	return t.templates
+}
+
+func (t *TemplateManager) ScanTemplateDir() {
 	templateFiles, err := os.ReadDir(templateDir)
 	if err != nil {
 		log.Fatalf("read template_files dir error %+v", err)
 	}
 	for _, templateFile := range templateFiles {
 		if !templateFile.IsDir() {
-			initTemplate(templateFile.Name())
+			t.initTemplate(templateFile.Name())
 		}
 	}
 }
-func initTemplate(fileName string) {
+func (t *TemplateManager) initTemplate(fileName string) {
 	templateFileContent, err := os.Open(path.Join(templateDir, fileName))
 	if err != nil {
 		log.Printf("[error] read template_file %s error %+v", fileName, err)
@@ -58,7 +64,7 @@ func initTemplate(fileName string) {
 	deviceTemplate := &DeviceTemplate{}
 	if err := decoder.Decode(deviceTemplate); err == nil {
 		deviceTemplate.FileName = fileName
-		Templates["v"+deviceTemplate.FwVersion.Major+"."+deviceTemplate.FwVersion.Minor] = deviceTemplate
+		t.templates["v"+deviceTemplate.FwVersion.Major+"."+deviceTemplate.FwVersion.Minor] = deviceTemplate
 	} else {
 		log.Printf("[error] decode template_file %s error %+v", fileName, err)
 	}

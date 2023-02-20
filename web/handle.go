@@ -40,7 +40,12 @@ type LoginRequest struct {
 	Password  string `json:"password"`
 }
 
-func handleLogin(w http.ResponseWriter, r *http.Request) {
+type Handler struct {
+	grpcClient      *grpc_client.GrpcClient
+	templateManager *device_template.TemplateManager
+}
+
+func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -52,11 +57,11 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body"+err.Error(), http.StatusBadRequest)
 		return
 	}
-	jwt, err := grpc_client.DefaultGrpcClient.Login(r.Context(), request.ServerUrl, request.Email, request.Password)
+	jwt, err := h.grpcClient.Login(r.Context(), request.ServerUrl, request.Email, request.Password)
 	Resp(w, jwt, err)
 }
 
-func handleList(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleList(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -77,15 +82,15 @@ func handleList(w http.ResponseWriter, r *http.Request) {
 	var list interface{}
 	switch request.ListType {
 	case "org":
-		list, err = grpc_client.DefaultGrpcClient.GetOrgList(ctx, serverParam)
+		list, err = h.grpcClient.GetOrgList(ctx, serverParam)
 	case "app":
-		list, err = grpc_client.DefaultGrpcClient.GetApplicationList(ctx, serverParam, request.ID)
+		list, err = h.grpcClient.GetApplicationList(ctx, serverParam, request.ID)
 	case "device":
-		list, err = grpc_client.DefaultGrpcClient.GetDeviceList(ctx, serverParam, request.ID)
+		list, err = h.grpcClient.GetDeviceList(ctx, serverParam, request.ID)
 	}
 	Resp(w, list, err)
 }
-func handleAPI(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleAPI(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -116,11 +121,11 @@ func handleAPI(w http.ResponseWriter, r *http.Request) {
 	} else if FPort == 0 && request.RequestType == "commands" {
 		FPort = 32
 	}
-	FCnt, err := grpc_client.DefaultGrpcClient.DeviceEnqueue(ctx, serverParam, request.DeviceID, uint32(FPort), request.Confirmed, byteData)
+	FCnt, err := h.grpcClient.DeviceEnqueue(ctx, serverParam, request.DeviceID, uint32(FPort), request.Confirmed, byteData)
 	Resp(w, map[string]interface{}{"FCnt": FCnt, "Paylod": hex.EncodeToString(byteData), "Base64": base64.RawStdEncoding.EncodeToString(byteData)}, err)
 }
 
-func handleRoot(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleRoot(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("public/dist/index.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -130,11 +135,11 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil)
 }
 
-func handleTemplateList(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleTemplateList(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	Succ(w, device_template.Templates)
+	Succ(w, h.templateManager.GetTemplates())
 }

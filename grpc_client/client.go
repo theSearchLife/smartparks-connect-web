@@ -11,10 +11,8 @@ import (
 	"google.golang.org/grpc"
 )
 
-var DefaultGrpcClient *GrpcClient
-
-func init() {
-	DefaultGrpcClient = &GrpcClient{
+func NewGrpcClient() *GrpcClient {
+	return &GrpcClient{
 		grpcConns: make(map[ServerParam]*grpc.ClientConn),
 		lock:      sync.RWMutex{},
 	}
