@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -36,11 +37,17 @@ func (g *GrpcClient) initConn(serverParam ServerParam) (*grpc.ClientConn, error)
 	dialOpts := []grpc.DialOption{
 		grpc.WithBlock(),
 		grpc.WithPerRPCCredentials(APIToken(serverParam.ApiToken)),
+		grpc.WithTimeout(time.Second * 3),
 		grpc.WithInsecure(),
 	}
 
 	// connect to the gRPC server
-	return grpc.Dial(serverParam.ServerUrl, dialOpts...)
+	conn, err := grpc.Dial(serverParam.ServerUrl, dialOpts...)
+	if err != nil {
+		return nil, err
+	}
+	g.grpcConns[serverParam] = conn
+	return conn, err
 }
 
 type APIToken string
