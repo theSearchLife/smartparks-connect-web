@@ -2,7 +2,9 @@ package grpc_client
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"google.golang.org/grpc/credentials"
 	"sync"
 	"time"
 
@@ -34,11 +36,13 @@ func (g *GrpcClient) initConn(serverParam ServerParam) (*grpc.ClientConn, error)
 	if client, ok := g.grpcConns[serverParam]; ok {
 		return client, nil
 	}
+	creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
 	dialOpts := []grpc.DialOption{
 		grpc.WithBlock(),
 		grpc.WithPerRPCCredentials(APIToken(serverParam.ApiToken)),
 		grpc.WithTimeout(time.Second * 3),
 		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(creds),
 	}
 
 	// connect to the gRPC server

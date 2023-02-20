@@ -8,17 +8,34 @@
       </div>
     </template>
 
-    <el-form :model="formServer" label-width="120px" :inline="true" ref="formSRef">
-
-      <el-form-item label="Server URL" prop="server_url" :rules="{
+    <el-form :model="formServer" :inline="true" ref="formSRef">
+      <el-row>
+        <el-col span="24">
+        <el-form-item label="Device Template:" prop="device_template" :rules="{
         required: true,
         message: 'server_url can not be null',
         trigger: 'blur',
       }">
-        <el-input v-model="formServer.server_url" />
+        <el-select v-model="formServer.device_template" class="m-2" placeholder="Select" @change="changeTemplate" style="width: 200px;">
+          <el-option
+            v-for="item,key in deviceTemplates"
+            :key="key"
+            :label="key"
+            :value="key"
+          />
+        </el-select>
+      </el-form-item>
+    </el-col>
+      </el-row>
+      <el-form-item label="GRPC Host:Port" width="200" prop="server_url" :rules="{
+        required: true,
+        message: 'server_url can not be null',
+        trigger: 'blur',
+      }">
+        <el-input v-model="formServer.server_url" autocomplete="on" />
       </el-form-item>
 
-
+      
       <el-form-item label="ApiKey" prop="api_key" :rules="{
         required: true,
         message: 'api_key can not be null',
@@ -30,6 +47,7 @@
 
 
       </el-form-item>
+      
       <el-form-item>
         <el-popover placement="bottom" title="Get User's ApiKey" :width="200" trigger="hover"
               content="Click this button, you can obtain apikey through the user's email/password">
@@ -73,17 +91,29 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, VueElement, ref ,watch} from 'vue'
+import { reactive, VueElement, ref ,watch,onBeforeMount} from 'vue'
 import { request } from '../js/request'
-import type { CascaderProps } from 'element-plus'
+import { CascaderProps, popoverEmits } from 'element-plus'
 import { Key, User } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import {lsave,lget,getSet} from '../js/localstore'
 const emit = defineEmits(["connectServer"]);
 const formSRef = ref<FormInstance>()
+const deviceTemplates = reactive({})
+
+request('v1/template/list',"GET").then((resp)=>{
+  for (let i in resp){
+    deviceTemplates[i] = resp[i]
+  }
+  console.log(deviceTemplates)
+  initModel()
+},(err)=>{
+  alert("device template load error")
+})
 
 
 const formServer = reactive({
+  device_template:"",
   server_url: '',
   api_key: ''
 })
@@ -91,8 +121,12 @@ const formLogin = reactive({
   email: "",
   password: "",
 })
-getSet('formServer',formServer)
-getSet('formLogin',formLogin)
+
+const initModel = ()=>{
+  getSet('formServer',formServer)
+  getSet('formLogin',formLogin) 
+}
+
 watch([formServer, formLogin], ([formServer, formLogin]) => {
     lsave('formServer',formServer)
     lsave('formLogin',formLogin)
@@ -112,11 +146,16 @@ const userLogin = () => {
   })
 }
 var orgList = new Array;
+const changeTemplate = () => {
+  emit('connectServer', formServer, config, orgList,deviceTemplates)
+}
 const connectServerSubmit = (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      var data = formServer
+      let data = {}
+      data['server_url'] = formServer.server_url
+      data['api_key'] = formServer.api_key
       data['list_type'] = 'org'
       request('v1/list', 'POST', data).then((resp) => {
         orgList = []
@@ -124,7 +163,7 @@ const connectServerSubmit = (formEl) => {
           orgList.push({ "id": resp[i].id, "name": resp[i].name })
         }
         config.connected = true
-        emit('connectServer', formServer, config, orgList)
+        emit('connectServer', formServer, config, orgList,deviceTemplates)
       }, (err) => {
         alert(err)
       })

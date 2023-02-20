@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/SmartParksOrg/smartparks-connect-web/device_template"
 	"github.com/SmartParksOrg/smartparks-connect-web/grpc_client"
 	"github.com/SmartParksOrg/smartparks-connect-web/utils"
 	"html/template"
@@ -14,9 +15,11 @@ import (
 
 type Request struct {
 	RequestType string `json:"request_type"`
+	Port        int    `json:"port"`
 	ServerUrl   string `json:"server_url"`
 	ApiKey      string `json:"api_key"`
 	DeviceID    string `json:"device_id"`
+	Confirmed   bool   `json:"confirmed"`
 
 	ID      string      `json:"id"`
 	Length  uint8       `json:"content_length"`
@@ -106,13 +109,13 @@ func handleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), time.Second*10)
 	defer cancel()
-	FPort := 0
-	if request.RequestType == "settings" {
+	FPort := request.Port
+	if FPort == 0 && request.RequestType == "settings" {
 		FPort = 3
-	} else if request.RequestType == "commands" {
+	} else if FPort == 0 && request.RequestType == "commands" {
 		FPort = 32
 	}
-	FCnt, err := grpc_client.DefaultGrpcClient.DeviceEnqueue(ctx, serverParam, request.DeviceID, uint32(FPort), true, byteData)
+	FCnt, err := grpc_client.DefaultGrpcClient.DeviceEnqueue(ctx, serverParam, request.DeviceID, uint32(FPort), request.Confirmed, byteData)
 	Resp(w, map[string]interface{}{"FCnt": FCnt, "Paylod": hex.EncodeToString(byteData)}, err)
 }
 
@@ -124,4 +127,13 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t.Execute(w, nil)
+}
+
+func handleTemplateList(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	Succ(w, device_template.Templates)
 }

@@ -1,134 +1,158 @@
 <template>
-  <ConnectServerFrom @connectServer="connectServer"></ConnectServerFrom>
-  <div class="top_place"></div>
+  <el-tabs type="border-card">
+    <el-tab-pane label="Connect Server Form">
+      <ConnectServerFrom @connectServer="connectServer"></ConnectServerFrom>
+      <div class="top_place"></div>
+      <el-card class="box-card" v-if="basedata.connected">
+        <template #header>
+          <div class="card-header">
+            <span>GRPC Request Form</span>
+          </div>
+        </template>
+        <el-form :model="formRequest" ref="formRef">
+          <el-row>
+            <el-alert title="only activated devices will show in the list" type="success"
+              style="margin-bottom: 10px;width:660px;" />
 
-  <el-card class="box-card" v-if="basedata.connected">
-    <template #header>
-      <div class="card-header">
-        <span>GRPC Request Form</span>
-      </div>
-    </template>
-    <el-form :model="formRequest" ref="formRef">
-      <el-row>
-        <el-alert title="only activated devices will show in the list" type="success" style="margin-bottom: 10px;"/>
-        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-          <el-form-item label="Select Device:" prop="device_id" :rules="{
-            required: true,
-            message: 'device can not be null',
-            trigger: 'blur',
-          }">
-            <el-cascader :props="props" v-model="formRequest.device_id"  style="width:550px;"/>
-          </el-form-item>
-        </el-col>
-      </el-row>
-    </el-form>
-    <div v-for="rtype in ['settings', 'commands']">
-      <div>
-        <h2>{{ rtype }}</h2>
-      </div>
-      <el-row v-for="item, key in settings[rtype]">
-        <el-form :inline="true" :ref="'formRef_' + key">
-          
-          <el-form-item>
-            <el-input :value="key" disabled></el-input>
-          </el-form-item>
-          <el-form-item label=""  prop="content" style="width: 160px;">
-            <el-input-number v-if="isNum(item.conversion) && item.length > 0" v-model="scforms['content' + key]" :max="item.max" :min="item.min"></el-input-number>
-            <el-input v-if="(item.conversion == 'string' || item.conversion == 'byte_array') && item.length > 0" v-model="scforms['content' + key]" :minlength="item.length"
-              :maxlength="item.length * 2" prop="content" placeholder="input string"/>
-            <el-radio-group v-if="item.conversion == 'bool' && item.length > 0"  v-model="scforms['content' + key]">
-              <el-radio-button label="true" />
-              <el-radio-button label="false" />
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item>
-            <div class="button_right">
-              <el-button type="primary" @click="doReq(formRef, key, item, rtype)">Send Request</el-button>
-            </div>
-          </el-form-item>
+            <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
+
+              <el-form-item label="Select Device:" prop="device_id" :rules="{
+                required: true,
+                message: 'device can not be null',
+                trigger: 'blur',
+              }">
+                <el-cascader :props="props" v-model="formRequest.device_id" style="width:550px;" />
+              </el-form-item>
+            </el-col>
+            <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
+
+            </el-col>
+          </el-row>
         </el-form>
-      </el-row>
-    </div>
+        <div v-for="rtype in ['settings', 'commands']">
+          <div>
+            <h2>{{ rtype }}</h2>
+          </div>
+          <el-row v-for="item, key in basedata.deviceTemplate[rtype]">
+            <el-form :inline="true" :ref="'formRef_' + key" v-if="key != 'type' && key != 'port'">
+
+              <el-form-item>
+                <el-input :value="key" disabled></el-input>
+              </el-form-item>
+              <el-form-item label="" prop="content" style="width: 160px;">
+                <el-input-number v-if="isNum(item.conversion) && item.length > 0"
+                  v-model="scforms['content' + key + basedata.deviceTemplateVersion]" :max="item.max"
+                  :min="item.min"></el-input-number>
+                <el-input v-if="(item.conversion == 'string' || item.conversion == 'byte_array') && item.length > 0"
+                  v-model="scforms['content' + key + basedata.deviceTemplateVersion]" :minlength="item.length"
+                  :maxlength="item.length * 2" prop="content" placeholder="input string" />
+                <el-radio-group v-if="item.conversion == 'bool' && item.length > 0"
+                  v-model="scforms['content' + key + basedata.deviceTemplateVersion]">
+                  <el-radio-button label="true" />
+                  <el-radio-button label="false" />
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item label="confirmed">
+                <el-switch v-model="scforms['confirmed_' + key + basedata.deviceTemplateVersion]" active-color="#13ce66"
+                  inactive-color="#ff4949">
+                </el-switch>
+              </el-form-item>
+              <el-form-item>
+                <div class="button_right">
+                  <el-button type="primary" @click="doReq(formRef, key, item, rtype)">Send Request</el-button>
+                </div>
+              </el-form-item>
+            </el-form>
+          </el-row>
+        </div>
+      </el-card>
+
+      <div class="top_place"></div>
+    </el-tab-pane>
+    <el-tab-pane label="Request Records">
+      <el-card class="box-card" v-if="basedata.connected">
+        <template #header>
+          <div class="card-header">
+            <span>Request Records</span>
+          </div>
+        </template>
+
+        <el-table show-header="true" :data="basedata.reqeustRecords" stripe="true">
+          <el-table-column prop="dateTime" label="dateTime" />
+          <el-table-column prop="deviceID" label="deviceID" />
+          <el-table-column prop="Payload" label="Payload" />
+          <el-table-column prop="FCnt" label="FCnt" />
+        </el-table>
 
 
-
-  </el-card>
-
-  <div class="top_place"></div>
-
-  <el-card class="box-card" v-if="basedata.connected">
-    <template #header>
-      <div class="card-header">
-        <span>Request Records</span>
-      </div>
-    </template>
-
-    <el-table show-header="true" :data="basedata.reqeustRecords" stripe="true">
-      <el-table-column prop="dateTime" label="dateTime" />
-      <el-table-column prop="deviceID" label="deviceID" />
-      <el-table-column prop="Payload" label="Payload" />
-      <el-table-column prop="FCnt" label="FCnt" />
-    </el-table>
-
-
-  </el-card>
+      </el-card>
+    </el-tab-pane>
+  </el-tabs>
 </template>
   
 <script lang="ts" setup>
-import { reactive, VueElement, ref, watch } from 'vue'
-import settings from '../js/settings_template'
+import { reactive, VueElement, ref, watch, nextTick } from 'vue'
 import { request } from '../js/request'
 import type { CascaderProps } from 'element-plus'
 import ConnectServerFrom from './ConnectServerForm.vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import {lsave,lget,getSet} from '../js/localstore'
-import { filter } from 'lodash'
+import { lsave, lget, getSet } from '../js/localstore'
 const formRef = ref<FormInstance>()
+
 
 let basedata = reactive({
   connected: false,
-  template_id:"default",
+  deviceTemplate: {},
   orgList: [],
   serverUrl: "",
   apiKey: "",
   reqeustRecords: [],
+  deviceTemplateVersion: "",
 })
 let scforms = reactive({})
 let formRequest = reactive({
   device_id: '',
+  confirmed: false,
 })
-getSet('basedata',basedata)
-getSet('scforms',scforms)
-getSet('formRequest',formRequest)
+const initModel = () => {
+  getSet('basedata', basedata)
+  getSet('scforms', scforms)
+  getSet('formRequest', formRequest)
+  basedata.connected = false
+}
+initModel()
 
-watch([basedata, scforms,formRequest], ([basedata, scforms,formRequest]) => {
-    lsave('basedata',basedata)
-    lsave('scforms',scforms)
-    lsave('formRequest',formRequest)
+
+watch([basedata, scforms, formRequest], ([basedata, scforms, formRequest]) => {
+  lsave('basedata', basedata)
+  lsave('scforms', scforms)
+  lsave('formRequest', formRequest)
 })
 
 const doReq = (formRef, idKey, idValue, rtype) => {
   formRef.validate((valid) => {
     if (valid) {
-      lsave('scforms',scforms)
+      lsave('scforms', scforms)
       if (idValue.length > 0 && scforms['content' + idKey] == undefined) {
         alert('content can not be null')
         return
       }
+      console.log(basedata)
       var data = {
         server_url: basedata.serverUrl,
         api_key: basedata.apiKey,
         id: idValue.id,
         device_id: formRequest.device_id[2],
+        confirmed: scforms['confirmed_' + idKey + basedata.deviceTemplateVersion],
         request_type: rtype,
-        content: scforms['content' + idKey],
+        port: basedata.deviceTemplate.ports[basedata.deviceTemplate[rtype].port],
+        content: scforms['content' + idKey + basedata.deviceTemplateVersion],
         content_type: idValue.conversion,
         content_length: idValue.length,
       }
       request('v1/device/queue', 'POST', data).then((resp) => {
         addRecord(data.device_id, resp.Paylod, resp.FCnt)
         alert('request successful! FCnt: ' + resp.FCnt + '; bytes: ' + resp.Paylod)
-
       }, (err) => {
         alert('request err :' + err)
       })
@@ -136,13 +160,16 @@ const doReq = (formRef, idKey, idValue, rtype) => {
   })
 }
 
-const connectServer = (formServer, config, orgList) => {
+const connectServer = (formServer, config, orgList, deviceTemplates) => {
   basedata.apiKey = formServer.api_key
+  basedata.deviceTemplate = deviceTemplates[formServer.device_template]
+  basedata.deviceTemplateVersion = formServer.device_template
+  console.log(basedata.deviceTemplate)
   basedata.orgList = orgList
   basedata.connected = false
-  setTimeout(() => {
-    basedata.connected = true
-  }, 100)
+  nextTick(() => {
+    basedata.connected = config.connected
+  })
 
   basedata.serverUrl = formServer.server_url
 }
@@ -151,7 +178,7 @@ const connectServer = (formServer, config, orgList) => {
 
 
 const isNum = (value) => {
-  return value == 'uint8' || value == 'uint32' || value == 'int32' || value == 'float' || value == 'uint16' ||value == 'int32'
+  return value == 'uint8' || value == 'uint32' || value == 'int32' || value == 'float' || value == 'uint16' || value == 'int32'
 }
 let id = 0
 const props: CascaderProps = {
@@ -182,8 +209,8 @@ const listRequest = (node, resolve, type) => {
   }
   request('v1/list', 'POST', data).then((resp) => {
     if (resp != null && resp.length > 0) {
-      
-      const nodes = Array.from(resp.filter((item)=>{
+
+      const nodes = Array.from(resp.filter((item) => {
         if (type != 'device') {
           return true
         }
@@ -231,5 +258,6 @@ const addRecord = (deviceID, Payload, FCnt) => {
 
 .top_place {
   margin-top: 50px;
-}</style>
+}
+</style>
   

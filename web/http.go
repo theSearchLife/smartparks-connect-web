@@ -10,7 +10,9 @@ func StartHttpServer() {
 	http.Handle("/api/v1/login", cors(http.HandlerFunc(handleLogin)))
 	http.Handle("/api/v1/device/queue", cors(http.HandlerFunc(handleAPI)))
 	http.Handle("/api/v1/list", cors(http.HandlerFunc(handleList)))
+	http.Handle("/api/v1/template/list", cors(http.HandlerFunc(handleTemplateList)))
 
+	http.Handle("/assets/device_template/", http.StripPrefix("/assets/device_template/", http.FileServer(http.Dir("template_files"))))
 	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("public/dist/assets"))))
 	http.HandleFunc("/", handleRoot)
 	log.Println("http server runing in port : 8881")
