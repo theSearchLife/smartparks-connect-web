@@ -8,6 +8,7 @@ import (
 
 func main() {
 	templateMananger := device_template.NewTemplateManager()
+	templateMananger.ScanTemplateDir()
 	grpcClient := grpc_client.NewGrpcClient()
 	web.StartHttpServer(grpcClient, templateMananger)
 
