@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"github.com/SmartParksOrg/smartparks-connect-web/device_template"
@@ -116,7 +117,7 @@ func handleAPI(w http.ResponseWriter, r *http.Request) {
 		FPort = 32
 	}
 	FCnt, err := grpc_client.DefaultGrpcClient.DeviceEnqueue(ctx, serverParam, request.DeviceID, uint32(FPort), request.Confirmed, byteData)
-	Resp(w, map[string]interface{}{"FCnt": FCnt, "Paylod": hex.EncodeToString(byteData)}, err)
+	Resp(w, map[string]interface{}{"FCnt": FCnt, "Paylod": hex.EncodeToString(byteData), "Base64": base64.RawStdEncoding.EncodeToString(byteData)}, err)
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {

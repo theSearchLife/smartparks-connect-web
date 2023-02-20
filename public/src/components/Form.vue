@@ -29,7 +29,9 @@
             </el-col>
           </el-row>
         </el-form>
-        <div v-for="rtype in ['settings', 'commands']">
+        <el-tabs type="border-card">
+    <el-tab-pane :label="rtype" v-for="rtype in ['settings', 'commands']">
+        <div>
           <div>
             <h2>{{ rtype }}</h2>
           </div>
@@ -65,6 +67,9 @@
             </el-form>
           </el-row>
         </div>
+        
+        </el-tab-pane>
+        </el-tabs>
       </el-card>
 
       <div class="top_place"></div>
@@ -81,6 +86,7 @@
           <el-table-column prop="dateTime" label="dateTime" />
           <el-table-column prop="deviceID" label="deviceID" />
           <el-table-column prop="Payload" label="Payload" />
+          <el-table-column prop="Base64" label="Base64" />
           <el-table-column prop="FCnt" label="FCnt" />
         </el-table>
 
@@ -151,8 +157,8 @@ const doReq = (formRef, idKey, idValue, rtype) => {
         content_length: idValue.length,
       }
       request('v1/device/queue', 'POST', data).then((resp) => {
-        addRecord(data.device_id, resp.Paylod, resp.FCnt)
-        alert('request successful! FCnt: ' + resp.FCnt + '; bytes: ' + resp.Paylod)
+        addRecord(data.device_id, resp.Paylod,resp.Base64, resp.FCnt)
+        alert('request successful! FCnt: ' + resp.FCnt + '; bytes: ' + resp.Paylod+' ; base64: '+resp.Base64)
       }, (err) => {
         alert('request err :' + err)
       })
@@ -235,15 +241,17 @@ interface Record {
   dateTime: string
   deviceID: string
   Payload: string
+  Base64: string
   FCnt: Number
 }
 
-const addRecord = (deviceID, Payload, FCnt) => {
+const addRecord = (deviceID, Payload, Base64,FCnt) => {
   basedata.reqeustRecords.push({
     dateTime: (new Date).toISOString(),
     deviceID: deviceID,
     Payload: Payload,
     FCnt: FCnt,
+    Base64:Base64,
   })
   console.log(basedata.reqeustRecords)
 }

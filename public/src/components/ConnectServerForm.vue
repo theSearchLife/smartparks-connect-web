@@ -11,50 +11,41 @@
     <el-form :model="formServer" :inline="true" ref="formSRef">
       <el-row>
         <el-col span="24">
-        <el-form-item label="Device Template:" prop="device_template" :rules="{
-        required: true,
-        message: 'server_url can not be null',
-        trigger: 'blur',
-      }">
-        <el-select v-model="formServer.device_template" class="m-2" placeholder="Select" @change="changeTemplate" style="width: 200px;">
-          <el-option
-            v-for="item,key in deviceTemplates"
-            :key="key"
-            :label="key"
-            :value="key"
-          />
-        </el-select>
-      </el-form-item>
-    </el-col>
+          <el-form-item label="Device Template:" prop="device_template" :rules="{
+            required: true,
+            message: 'device template can not be null',
+            trigger: 'blur',
+          }">
+            <el-select v-model="formServer.device_template" class="m-2" placeholder="Select" @change="changeTemplate"
+              style="width: 200px;">
+              <el-option v-for="item, key in deviceTemplates" :key="key" :label="key" :value="key" />
+            </el-select>
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-form-item label="GRPC Host:Port" width="200" prop="server_url" :rules="{
-        required: true,
-        message: 'server_url can not be null',
+        validator: validateGrpcHostPort,
         trigger: 'blur',
       }">
         <el-input v-model="formServer.server_url" autocomplete="on" />
       </el-form-item>
 
-      
+
       <el-form-item label="ApiKey" prop="api_key" :rules="{
         required: true,
         message: 'api_key can not be null',
         trigger: 'blur',
       }">
-        <el-input v-model="formServer.api_key">
-          
-        </el-input>
-
-
+        <el-input v-model="formServer.api_key"></el-input>
       </el-form-item>
-      
+
       <el-form-item>
         <el-popover placement="bottom" title="Get User's ApiKey" :width="200" trigger="hover"
-              content="Click this button, you can obtain apikey through the user's email/password">
-              <template #reference>
-                <el-button type="danger" :icon="Key" @click="config.dialogFormVisible = true">GetUserApiKey</el-button>
-              </template>
-            </el-popover>
+          content="Click this button, you can obtain apikey through the user's email/password">
+          <template #reference>
+            <el-button type="danger" :icon="Key" @click="config.dialogFormVisible = true">GetUserApiKey</el-button>
+          </template>
+        </el-popover>
       </el-form-item>
 
 
@@ -91,29 +82,38 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, VueElement, ref ,watch,onBeforeMount} from 'vue'
+import { reactive, VueElement, ref, watch, onBeforeMount } from 'vue'
 import { request } from '../js/request'
 import { CascaderProps, popoverEmits } from 'element-plus'
 import { Key, User } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import {lsave,lget,getSet} from '../js/localstore'
+import { lsave, lget, getSet } from '../js/localstore'
 const emit = defineEmits(["connectServer"]);
 const formSRef = ref<FormInstance>()
 const deviceTemplates = reactive({})
-
-request('v1/template/list',"GET").then((resp)=>{
-  for (let i in resp){
+var validateGrpcHostPort = (rule, value, callback) => {
+  let re = /^[a-zA-Z\.\-0-9]{0,}:\d{1,5}$/
+  if (value === '' || value == null) {
+    callback(new Error('Please input the grpc host:port'));
+  } else if (!re.test(value)) {
+    callback(new Error('Format must be:  host:port (without any protocol prefix)'));
+  } else {
+    callback();
+  }
+};
+request('v1/template/list', "GET").then((resp) => {
+  for (let i in resp) {
     deviceTemplates[i] = resp[i]
   }
   console.log(deviceTemplates)
   initModel()
-},(err)=>{
+}, (err) => {
   alert("device template load error")
 })
 
 
 const formServer = reactive({
-  device_template:"",
+  device_template: "",
   server_url: '',
   api_key: ''
 })
@@ -122,14 +122,14 @@ const formLogin = reactive({
   password: "",
 })
 
-const initModel = ()=>{
-  getSet('formServer',formServer)
-  getSet('formLogin',formLogin) 
+const initModel = () => {
+  getSet('formServer', formServer)
+  getSet('formLogin', formLogin)
 }
 
 watch([formServer, formLogin], ([formServer, formLogin]) => {
-    lsave('formServer',formServer)
-    lsave('formLogin',formLogin)
+  lsave('formServer', formServer)
+  lsave('formLogin', formLogin)
 })
 const config = reactive({
   connected: false,
@@ -147,7 +147,7 @@ const userLogin = () => {
 }
 var orgList = new Array;
 const changeTemplate = () => {
-  emit('connectServer', formServer, config, orgList,deviceTemplates)
+  emit('connectServer', formServer, config, orgList, deviceTemplates)
 }
 const connectServerSubmit = (formEl) => {
   if (!formEl) return
@@ -163,7 +163,7 @@ const connectServerSubmit = (formEl) => {
           orgList.push({ "id": resp[i].id, "name": resp[i].name })
         }
         config.connected = true
-        emit('connectServer', formServer, config, orgList,deviceTemplates)
+        emit('connectServer', formServer, config, orgList, deviceTemplates)
       }, (err) => {
         alert(err)
       })
