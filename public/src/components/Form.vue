@@ -128,6 +128,20 @@ const initModel = () => {
 }
 initModel()
 
+const setDefault = (deviceTemplate) => {
+  for (var idKey in deviceTemplate['settings']) {
+    if (scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined && deviceTemplate['settings'][idKey].default != undefined) {
+      console.log('------',replaceBytesToStr(deviceTemplate['settings'][idKey].default))
+      scforms['content' + idKey + basedata.deviceTemplateVersion] = replaceBytesToStr(deviceTemplate['settings'][idKey].default)
+    } 
+  }
+  for (var idKey in deviceTemplate['commands']){
+    if (scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined && deviceTemplate['commands'][idKey].default != undefined ) {
+      scforms['content' + idKey + basedata.deviceTemplateVersion] = replaceBytesToStr(deviceTemplate['commands'][idKey].default)
+    } 
+  }
+}
+
 
 watch([basedata, scforms, formRequest], ([basedata, scforms, formRequest]) => {
   lsave('basedata', basedata)
@@ -165,7 +179,12 @@ const doReq = (formRef, idKey, idValue, rtype) => {
     }
   })
 }
-
+const replaceBytesToStr = (bytes)=>{
+  if (bytes.replaceAll == undefined){
+    return bytes
+  }
+  return bytes.replaceAll('{','').replaceAll('}','').replaceAll('0x','').replaceAll(',','')
+}
 const connectServer = (formServer, config, orgList, deviceTemplates) => {
   basedata.apiKey = formServer.api_key
   basedata.deviceTemplate = deviceTemplates[formServer.device_template]
@@ -175,6 +194,7 @@ const connectServer = (formServer, config, orgList, deviceTemplates) => {
   basedata.connected = false
   nextTick(() => {
     basedata.connected = config.connected
+    setDefault(basedata.deviceTemplate)
   })
 
   basedata.serverUrl = formServer.server_url
