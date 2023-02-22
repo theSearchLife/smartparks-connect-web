@@ -131,7 +131,6 @@ initModel()
 const setDefault = (deviceTemplate) => {
   for (var idKey in deviceTemplate['settings']) {
     if (scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined && deviceTemplate['settings'][idKey].default != undefined) {
-      console.log('------',replaceBytesToStr(deviceTemplate['settings'][idKey].default))
       scforms['content' + idKey + basedata.deviceTemplateVersion] = replaceBytesToStr(deviceTemplate['settings'][idKey].default)
     } 
   }
