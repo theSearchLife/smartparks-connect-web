@@ -36,7 +36,7 @@
         message: 'api_key can not be null',
         trigger: 'blur',
       }">
-        <el-input v-model="formServer.api_key"></el-input>
+        <el-input v-model="formServer.api_key" type="password"></el-input>
       </el-form-item>
 
       <el-form-item>
