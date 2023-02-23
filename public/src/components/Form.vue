@@ -152,7 +152,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
   formRef.validate((valid) => {
     if (valid) {
       lsave('scforms', scforms)
-      if (idValue.length > 0 && scforms['content' + idKey] == undefined) {
+      if (idValue.length > 0 && scforms['confirmed_' + idKey + basedata.deviceTemplateVersion] == undefined) {
         alert('content can not be null')
         return
       }
