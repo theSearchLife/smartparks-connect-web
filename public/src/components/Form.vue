@@ -178,7 +178,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
   })
 }
 const replaceBytesToStr = (bytes)=>{
-  if (bytes.replaceAll == undefined){
+  if (bytes == undefined || bytes.replaceAll == undefined){
     return bytes
   }
   return bytes.replaceAll('{','').replaceAll('}','').replaceAll('0x','').replaceAll(',','').replaceAll(' ','')
