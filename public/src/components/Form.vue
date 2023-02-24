@@ -46,8 +46,7 @@
                   v-model="scforms['content' + key + basedata.deviceTemplateVersion]" :max="item.max"
                   :min="item.min"></el-input-number>
                 <el-input v-if="(item.conversion == 'string' || item.conversion == 'byte_array') && item.length > 0"
-                  v-model="scforms['content' + key + basedata.deviceTemplateVersion]" :minlength="item.length"
-                  :maxlength="item.length * 2" prop="content" placeholder="input string" />
+                  v-model="scforms['content' + key + basedata.deviceTemplateVersion]" prop="content" placeholder="input string" />
                 <el-radio-group v-if="item.conversion == 'bool' && item.length > 0"
                   v-model="scforms['content' + key + basedata.deviceTemplateVersion]">
                   <el-radio-button label="true" />
@@ -131,12 +130,12 @@ initModel()
 const setDefault = (deviceTemplate) => {
   for (var idKey in deviceTemplate['settings']) {
     if (scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined && deviceTemplate['settings'][idKey].default != undefined) {
-      scforms['content' + idKey + basedata.deviceTemplateVersion] = replaceBytesToStr(deviceTemplate['settings'][idKey].default)
+      scforms['content' + idKey + basedata.deviceTemplateVersion] = deviceTemplate['settings'][idKey].default
     } 
   }
   for (var idKey in deviceTemplate['commands']){
     if (scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined && deviceTemplate['commands'][idKey].default != undefined ) {
-      scforms['content' + idKey + basedata.deviceTemplateVersion] = replaceBytesToStr(deviceTemplate['commands'][idKey].default)
+      scforms['content' + idKey + basedata.deviceTemplateVersion] = deviceTemplate['commands'][idKey].default
     } 
   }
 }
@@ -152,7 +151,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
   formRef.validate((valid) => {
     if (valid) {
       lsave('scforms', scforms)
-      if (idValue.length > 0 && scforms['content' + idKey] == undefined) {
+      if (idValue.length > 0 && scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined) {
         alert('content can not be null')
         return
       }
@@ -165,7 +164,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
         confirmed: scforms['confirmed_' + idKey + basedata.deviceTemplateVersion],
         request_type: rtype,
         port: basedata.deviceTemplate.ports[basedata.deviceTemplate[rtype].port],
-        content: scforms['content' + idKey + basedata.deviceTemplateVersion],
+        content: replaceBytesToStr(scforms['content' + idKey + basedata.deviceTemplateVersion]),
         content_type: idValue.conversion,
         content_length: idValue.length,
       }
@@ -179,10 +178,10 @@ const doReq = (formRef, idKey, idValue, rtype) => {
   })
 }
 const replaceBytesToStr = (bytes)=>{
-  if (bytes.replaceAll == undefined){
+  if (bytes == undefined || bytes.replaceAll == undefined){
     return bytes
   }
-  return bytes.replaceAll('{','').replaceAll('}','').replaceAll('0x','').replaceAll(',','')
+  return bytes.replaceAll('{','').replaceAll('}','').replaceAll('0x','').replaceAll(',','').replaceAll(' ','')
 }
 const connectServer = (formServer, config, orgList, deviceTemplates) => {
   basedata.apiKey = formServer.api_key
