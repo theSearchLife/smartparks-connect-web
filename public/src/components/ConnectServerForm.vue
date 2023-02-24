@@ -40,8 +40,8 @@
       </el-form-item>
 
       <el-form-item>
-        <el-popover placement="bottom" title="Get User's ApiKey" :width="200" trigger="hover"
-          content="Click this button, you can obtain apikey through the user's email/password">
+        <el-popover placement="bottom" title="Get ApiKey" :width="200" trigger="hover"
+          content="Click this button to obtain a valid ApiKey using your server email and password">
           <template #reference>
             <el-button type="danger" :icon="Key" @click="config.dialogFormVisible = true">GetUserApiKey</el-button>
           </template>
