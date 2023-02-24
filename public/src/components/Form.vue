@@ -6,7 +6,7 @@
       <el-card class="box-card" v-if="basedata.connected">
         <template #header>
           <div class="card-header">
-            <span>GRPC Request Form</span>
+            <span>Downlink message form</span>
           </div>
         </template>
         <el-form :model="formRequest" ref="formRef">
@@ -82,10 +82,10 @@
         </template>
 
         <el-table show-header="true" :data="basedata.reqeustRecords" stripe="true">
-          <el-table-column prop="dateTime" label="dateTime" />
-          <el-table-column prop="deviceID" label="deviceID" />
-          <el-table-column prop="Payload" label="Payload" />
-          <el-table-column prop="Base64" label="Base64" />
+          <el-table-column prop="dateTime" label="Date + Time" />
+          <el-table-column prop="deviceID" label="Device EUI" />
+          <el-table-column prop="Payload" label="Payload (hex)" />
+          <el-table-column prop="Base64" label="Payload (base64)" />
           <el-table-column prop="FCnt" label="FCnt" />
         </el-table>
 

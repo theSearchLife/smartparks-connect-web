@@ -23,11 +23,11 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-form-item label="GRPC Host:Port" width="200" prop="server_url" :rules="{
+      <el-form-item label="Server address" width="200" prop="server_url" :rules="{
         validator: validateGrpcHostPort,
         trigger: 'blur',
       }">
-        <el-input v-model="formServer.server_url" autocomplete="on" />
+        <el-input v-model="formServer.server_url" placeholder="host:port" autocomplete="on" />
       </el-form-item>
 
 
@@ -43,25 +43,24 @@
         <el-popover placement="bottom" title="Get ApiKey" :width="200" trigger="hover"
           content="Click this button to obtain a valid ApiKey using your server email and password">
           <template #reference>
-            <el-button type="danger" :icon="Key" @click="config.dialogFormVisible = true">GetUserApiKey</el-button>
+            <el-button type="danger" :icon="Key" @click="config.dialogFormVisible = true">Get ApiKey</el-button>
           </template>
         </el-popover>
       </el-form-item>
 
-
-      <el-form-item>
-        <div class="button_right">
-          <el-button type="primary" @click="connectServerSubmit(formSRef)">Connect Server</el-button>
-        </div>
-
-      </el-form-item>
-
+      <el-row>
+        <el-form-item>
+          <div class="button_right">
+            <el-button type="primary" @click="connectServerSubmit(formSRef)">Connect Server</el-button>
+          </div>
+        </el-form-item>
+      </el-row>
 
     </el-form>
 
   </el-card>
 
-  <el-dialog v-model="config.dialogFormVisible" title="Get APIKey By User">
+  <el-dialog v-model="config.dialogFormVisible" title="Get APIKey By email and password">
     <el-form :model="formLogin">
       <el-form-item label="email">
         <el-input v-model="formLogin.email" autocomplete="off" />
