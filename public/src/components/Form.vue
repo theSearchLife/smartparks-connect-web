@@ -3,20 +3,20 @@
     <el-tab-pane label="Connect Server Form">
       <ConnectServerFrom @connectServer="connectServer"></ConnectServerFrom>
       <div class="top_place"></div>
+
       <el-card class="box-card" v-if="basedata.connected">
         <template #header>
           <div class="card-header">
-            <span>Downlink message form</span>
+            <span>Select Device</span>
           </div>
         </template>
         <el-form :model="formRequest" ref="formRef">
           <el-row>
             <el-alert title="only activated devices will show in the list" type="success"
               style="margin-bottom: 10px;width:660px;" />
-
             <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
 
-              <el-form-item label="Select Device:" prop="device_id" :rules="{
+              <el-form-item prop="device_id" :rules="{
                 required: true,
                 message: 'device can not be null',
                 trigger: 'blur',
@@ -29,45 +29,54 @@
             </el-col>
           </el-row>
         </el-form>
-        <el-tabs type="border-card">
-    <el-tab-pane :label="rtype" v-for="rtype in ['settings', 'commands']">
-        <div>
-          <div>
-            <h2>{{ rtype }}</h2>
-          </div>
-          <el-row v-for="item, key in basedata.deviceTemplate[rtype]">
-            <el-form :inline="true" :ref="'formRef_' + key" v-if="key != 'type' && key != 'port'">
+      </el-card>
 
-              <el-form-item>
-                <el-input :value="key" disabled></el-input>
-              </el-form-item>
-              <el-form-item label="" prop="content" style="width: 160px;">
-                <el-input-number v-if="isNum(item.conversion) && item.length > 0"
-                  v-model="scforms['content' + key + basedata.deviceTemplateVersion]" :max="item.max"
-                  :min="item.min"></el-input-number>
-                <el-input v-if="(item.conversion == 'string' || item.conversion == 'byte_array') && item.length > 0"
-                  v-model="scforms['content' + key + basedata.deviceTemplateVersion]" prop="content" placeholder="input string" />
-                <el-radio-group v-if="item.conversion == 'bool' && item.length > 0"
-                  v-model="scforms['content' + key + basedata.deviceTemplateVersion]">
-                  <el-radio-button label="true" />
-                  <el-radio-button label="false" />
-                </el-radio-group>
-              </el-form-item>
-              <el-form-item label="confirmed">
-                <el-switch v-model="scforms['confirmed_' + key + basedata.deviceTemplateVersion]" active-color="#13ce66"
-                  inactive-color="#ff4949">
-                </el-switch>
-              </el-form-item>
-              <el-form-item>
-                <div class="button_right">
-                  <el-button type="primary" @click="doReq(formRef, key, item, rtype)">Send Request</el-button>
-                </div>
-              </el-form-item>
-            </el-form>
-          </el-row>
-        </div>
-        
-        </el-tab-pane>
+      <el-card class="box-card" v-if="basedata.connected">
+        <template #header>
+          <div class="card-header">
+            <span>Downlink message form</span>
+          </div>
+        </template>
+        <el-tabs type="border-card">
+          <el-tab-pane :label="rtype" v-for="rtype in ['settings', 'commands']">
+            <div>
+              <div>
+                <h2>{{ rtype }}</h2>
+              </div>
+              <el-row v-for="item, key in basedata.deviceTemplate[rtype]">
+                <el-form :inline="true" :ref="'formRef_' + key" v-if="key != 'type' && key != 'port'">
+
+                  <el-form-item>
+                    <el-input :value="key" disabled></el-input>
+                  </el-form-item>
+                  <el-form-item label="" prop="content" style="width: 160px;">
+                    <el-input-number v-if="isNum(item.conversion) && item.length > 0"
+                      v-model="scforms['content' + key + basedata.deviceTemplateVersion]" :max="item.max"
+                      :min="item.min"></el-input-number>
+                    <el-input v-if="(item.conversion == 'string' || item.conversion == 'byte_array') && item.length > 0"
+                      v-model="scforms['content' + key + basedata.deviceTemplateVersion]" prop="content"
+                      placeholder="input string" />
+                    <el-radio-group v-if="item.conversion == 'bool' && item.length > 0"
+                      v-model="scforms['content' + key + basedata.deviceTemplateVersion]">
+                      <el-radio-button label="true" />
+                      <el-radio-button label="false" />
+                    </el-radio-group>
+                  </el-form-item>
+                  <el-form-item label="confirmed">
+                    <el-switch v-model="scforms['confirmed_' + key + basedata.deviceTemplateVersion]"
+                      active-color="#13ce66" inactive-color="#ff4949">
+                    </el-switch>
+                  </el-form-item>
+                  <el-form-item>
+                    <div class="button_right">
+                      <el-button type="primary" @click="doReq(formRef, key, item, rtype)">Send Request</el-button>
+                    </div>
+                  </el-form-item>
+                </el-form>
+              </el-row>
+            </div>
+
+          </el-tab-pane>
         </el-tabs>
       </el-card>
 
@@ -131,12 +140,12 @@ const setDefault = (deviceTemplate) => {
   for (var idKey in deviceTemplate['settings']) {
     if (scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined && deviceTemplate['settings'][idKey].default != undefined) {
       scforms['content' + idKey + basedata.deviceTemplateVersion] = deviceTemplate['settings'][idKey].default
-    } 
+    }
   }
-  for (var idKey in deviceTemplate['commands']){
-    if (scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined && deviceTemplate['commands'][idKey].default != undefined ) {
+  for (var idKey in deviceTemplate['commands']) {
+    if (scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined && deviceTemplate['commands'][idKey].default != undefined) {
       scforms['content' + idKey + basedata.deviceTemplateVersion] = deviceTemplate['commands'][idKey].default
-    } 
+    }
   }
 }
 
@@ -169,19 +178,19 @@ const doReq = (formRef, idKey, idValue, rtype) => {
         content_length: idValue.length,
       }
       request('v1/device/queue', 'POST', data).then((resp) => {
-        addRecord(data.device_id, resp.Paylod,resp.Base64, resp.FCnt)
-        alert('request successful! FCnt: ' + resp.FCnt + '; bytes: ' + resp.Paylod+' ; base64: '+resp.Base64)
+        addRecord(data.device_id, resp.Paylod, resp.Base64, resp.FCnt)
+        alert('request successful! FCnt: ' + resp.FCnt + '; bytes: ' + resp.Paylod + ' ; base64: ' + resp.Base64)
       }, (err) => {
         alert('request err :' + err)
       })
     }
   })
 }
-const replaceBytesToStr = (bytes)=>{
-  if (bytes == undefined || bytes.replaceAll == undefined){
+const replaceBytesToStr = (bytes) => {
+  if (bytes == undefined || bytes.replaceAll == undefined) {
     return bytes
   }
-  return bytes.replaceAll('{','').replaceAll('}','').replaceAll('0x','').replaceAll(',','').replaceAll(' ','')
+  return bytes.replaceAll('{', '').replaceAll('}', '').replaceAll('0x', '').replaceAll(',', '').replaceAll(' ', '')
 }
 const connectServer = (formServer, config, orgList, deviceTemplates) => {
   basedata.apiKey = formServer.api_key
@@ -263,13 +272,13 @@ interface Record {
   FCnt: Number
 }
 
-const addRecord = (deviceID, Payload, Base64,FCnt) => {
+const addRecord = (deviceID, Payload, Base64, FCnt) => {
   basedata.reqeustRecords.push({
     dateTime: (new Date).toISOString(),
     deviceID: deviceID,
     Payload: Payload,
     FCnt: FCnt,
-    Base64:Base64,
+    Base64: Base64,
   })
   console.log(basedata.reqeustRecords)
 }
