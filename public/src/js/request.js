@@ -4,7 +4,7 @@ import { ElLoading } from 'element-plus'
 var loading;
 // Create an axios instance
 const instance = axios.create({
-  baseURL: location.protocol + "//" + location.hostname + ':8881/api/',
+  baseURL: '/api/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
