@@ -1,4 +1,15 @@
-@import 'base.css';
+.button_right {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  align-items: end;
+}
+
+.top_place {
+  margin-top: 50px;
+}
+
+/* @import 'base.css';
 
 #app {
   max-width: 1280px;
@@ -6,8 +17,10 @@
   padding: 2rem;
 
   font-weight: normal;
-}
+} */
 
+
+/* 
 a,
 .green {
   text-decoration: none;
@@ -32,4 +45,4 @@ a,
     grid-template-columns: 1fr 1fr;
     padding: 0 2rem;
   }
-}
+} */

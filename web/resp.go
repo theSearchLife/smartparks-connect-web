@@ -2,7 +2,7 @@ package web
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
+	"errors"
 	"log"
 	"net/http"
 )
@@ -49,9 +49,9 @@ func Resp(writer http.ResponseWriter, result interface{}, err error) {
 		resp.ErrMsg = err.Error()
 		json.NewEncoder(writer).Encode(resp)
 	} else {
-		resp.Code = 2001
+		resp.Code = 500
 		resp.ErrMsg = err.Error()
-		log.Println("[error] server error %+v", err)
+		log.Println("[error] server error", err)
 		json.NewEncoder(writer).Encode(resp)
 	}
 

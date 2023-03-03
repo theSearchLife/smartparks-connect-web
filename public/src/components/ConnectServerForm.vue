@@ -10,7 +10,7 @@
 
     <el-form :model="formServer" :inline="true" ref="formSRef">
       <el-row>
-        <el-col span="24">
+        <el-col span=24>
           <el-form-item label="Device Template:" prop="device_template" :rules="{
             required: true,
             message: 'device template can not be null',
@@ -107,7 +107,7 @@ request('v1/template/list', "GET").then((resp) => {
   console.log(deviceTemplates)
   initModel()
 }, (err) => {
-  alert("device template load error")
+  alert("device template load error:" + err)
 })
 
 

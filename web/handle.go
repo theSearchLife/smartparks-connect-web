@@ -5,13 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/SmartParksOrg/smartparks-connect-web/device_template"
-	"github.com/SmartParksOrg/smartparks-connect-web/grpc_client"
-	"github.com/SmartParksOrg/smartparks-connect-web/utils"
 	"html/template"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/SmartParksOrg/smartparks-connect-web/device_template"
+	"github.com/SmartParksOrg/smartparks-connect-web/grpc_client"
+	"github.com/SmartParksOrg/smartparks-connect-web/utils"
 )
 
 type Request struct {
@@ -19,7 +20,7 @@ type Request struct {
 	Port        int    `json:"port"`
 	ServerUrl   string `json:"server_url"`
 	ApiKey      string `json:"api_key"`
-	DeviceID    string `json:"device_id"`
+	DevEui      string `json:"dev_eui"`
 	Confirmed   bool   `json:"confirmed"`
 
 	ID      string      `json:"id"`
@@ -121,7 +122,7 @@ func (h *Handler) handleAPI(w http.ResponseWriter, r *http.Request) {
 	} else if FPort == 0 && request.RequestType == "commands" {
 		FPort = 32
 	}
-	FCnt, err := h.grpcClient.DeviceEnqueue(ctx, serverParam, request.DeviceID, uint32(FPort), request.Confirmed, byteData)
+	FCnt, err := h.grpcClient.DeviceEnqueue(ctx, serverParam, request.DevEui, uint32(FPort), request.Confirmed, byteData)
 	Resp(w, map[string]interface{}{"FCnt": FCnt, "Paylod": hex.EncodeToString(byteData), "Base64": base64.RawStdEncoding.EncodeToString(byteData)}, err)
 }
 

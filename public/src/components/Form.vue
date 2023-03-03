@@ -15,13 +15,12 @@
             <el-alert title="only activated devices will show in the list" type="success"
               style="margin-bottom: 10px;width:660px;" />
             <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
-
-              <el-form-item prop="device_id" :rules="{
+              <el-form-item prop="data" :rules="{
                 required: true,
                 message: 'device can not be null',
                 trigger: 'blur',
               }">
-                <el-cascader :props="props" v-model="formRequest.device_id" style="width:550px;" />
+                <el-cascader :props="props" v-model="formRequest.data" style="width:550px;" />
               </el-form-item>
             </el-col>
             <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
@@ -49,7 +48,7 @@
                   <el-form-item>
                     <el-input :value="key" disabled></el-input>
                   </el-form-item>
-                  <el-form-item label="" prop="content" style="width: 160px;">
+                  <el-form-item label="" prop="content">
                     <el-input-number v-if="isNum(item.conversion) && item.length > 0"
                       v-model="scforms['content' + key + basedata.deviceTemplateVersion]" :max="item.max"
                       :min="item.min"></el-input-number>
@@ -90,12 +89,14 @@
           </div>
         </template>
 
-        <el-table show-header="true" :data="basedata.reqeustRecords" stripe="true">
+        <el-table show-header=true :data="basedata.requestRecords" stripe=true>
           <el-table-column prop="dateTime" label="Date + Time" />
-          <el-table-column prop="deviceID" label="Device EUI" />
-          <el-table-column prop="Payload" label="Payload (hex)" />
-          <el-table-column prop="Base64" label="Payload (base64)" />
-          <el-table-column prop="FCnt" label="FCnt" />
+          <el-table-column prop="name" label="Name" />
+          <el-table-column prop="devEUI" label="EUI" />
+          <el-table-column prop="payload" label="Payload (hex)" />
+          <el-table-column prop="base64" label="Payload (base64)" />
+          <el-table-column prop="fCnt" label="FCnt" />
+          <el-table-column prop="confirmed" label="Confirmed" />
         </el-table>
 
 
@@ -120,12 +121,12 @@ let basedata = reactive({
   orgList: [],
   serverUrl: "",
   apiKey: "",
-  reqeustRecords: [],
+  requestRecords: [],
   deviceTemplateVersion: "",
 })
 let scforms = reactive({})
 let formRequest = reactive({
-  device_id: '',
+  data: '',
   confirmed: false,
 })
 const initModel = () => {
@@ -165,11 +166,16 @@ const doReq = (formRef, idKey, idValue, rtype) => {
         return
       }
       console.log(basedata)
+
+      var tt = formRequest.data[2].split(":")
+      var dev_eui = tt[0]
+      var name = tt[1]
+
       var data = {
         server_url: basedata.serverUrl,
         api_key: basedata.apiKey,
         id: idValue.id,
-        device_id: formRequest.device_id[2],
+        dev_eui: dev_eui,
         confirmed: scforms['confirmed_' + idKey + basedata.deviceTemplateVersion],
         request_type: rtype,
         port: basedata.deviceTemplate.ports[basedata.deviceTemplate[rtype].port],
@@ -178,8 +184,8 @@ const doReq = (formRef, idKey, idValue, rtype) => {
         content_length: idValue.length,
       }
       request('v1/device/queue', 'POST', data).then((resp) => {
-        addRecord(data.device_id, resp.Paylod, resp.Base64, resp.FCnt)
-        alert('request successful! FCnt: ' + resp.FCnt + '; bytes: ' + resp.Paylod + ' ; base64: ' + resp.Base64)
+        addRecord(data.dev_eui, name, resp.Paylod, resp.Base64, resp.FCnt, data.confirmed)
+        alert('request successful! ' + 'eui:' + data.dev_eui + ' name:' + name + 'FCnt: ' + resp.FCnt + '; bytes: ' + resp.Paylod + ' ; base64: ' + resp.Base64 + ' ; confirmed: ' + data.confirmed)
       }, (err) => {
         alert('request err :' + err)
       })
@@ -252,7 +258,7 @@ const listRequest = (node, resolve, type) => {
         }
         return false
       })).map((item) => ({
-        value: (type == 'device') ? item.dev_eui : item.id,
+        value: (type == 'device') ? item.dev_eui + ':' + item.name : item.id,
         label: item.name,
         leaf: node.level >= 2,
       }))
@@ -272,27 +278,16 @@ interface Record {
   FCnt: Number
 }
 
-const addRecord = (deviceID, Payload, Base64, FCnt) => {
-  basedata.reqeustRecords.push({
+const addRecord = (devEUI, name, payload, base64, fCnt, confirmed) => {
+  basedata.requestRecords.push({
+    name: name,
     dateTime: (new Date).toISOString(),
-    deviceID: deviceID,
-    Payload: Payload,
-    FCnt: FCnt,
-    Base64: Base64,
+    devEUI: devEUI,
+    payload: payload,
+    fCnt: fCnt,
+    base64: base64,
+    confirmed: confirmed,
   })
-  console.log(basedata.reqeustRecords)
+  console.log(basedata.requestRecords)
 }
 </script>
-<style>
-.button_right {
-  width: 100%;
-  display: flex;
-  justify-content: end;
-  align-items: end;
-}
-
-.top_place {
-  margin-top: 50px;
-}
-</style>
-  

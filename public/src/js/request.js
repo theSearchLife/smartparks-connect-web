@@ -4,7 +4,7 @@ import { ElLoading } from 'element-plus'
 var loading;
 // Create an axios instance
 const instance = axios.create({
-  baseURL: '/api/',
+  baseURL: location.protocol + "//" + location.hostname + ':8881/api/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
@@ -25,22 +25,22 @@ instance.interceptors.request.use(
 
 // Response interceptor
 instance.interceptors.response.use(
-    
+
   response => {
-    if (loading != null){
-        loading.close()
+    if (loading != null) {
+      loading.close()
     }
     // Do something with the response data
     if (response.data.code != 200) {
-        // Handle the response error
-        return Promise.reject(response.data.err_msg);
+      // Handle the response error
+      return Promise.reject(response.data.err_msg);
     }
     return response.data.result
   },
   error => {
     // Handle the response error
-    if (loading != null){
-        loading.close()
+    if (loading != null) {
+      loading.close()
     }
     return Promise.reject(error);
   }
