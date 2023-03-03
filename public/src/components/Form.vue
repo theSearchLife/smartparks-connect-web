@@ -93,6 +93,8 @@
           <el-table-column prop="dateTime" label="Date + Time" />
           <el-table-column prop="name" label="Name" />
           <el-table-column prop="devEUI" label="EUI" />
+          <el-table-column prop="type" label="Type" />
+          <el-table-column prop="port" label="Port" />
           <el-table-column prop="payload" label="Payload (hex)" />
           <el-table-column prop="base64" label="Payload (base64)" />
           <el-table-column prop="fCnt" label="FCnt" />
@@ -127,7 +129,6 @@ let basedata = reactive({
 let scforms = reactive({})
 let formRequest = reactive({
   data: '',
-  confirmed: false,
 })
 const initModel = () => {
   getSet('basedata', basedata)
@@ -142,10 +143,17 @@ const setDefault = (deviceTemplate) => {
     if (scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined && deviceTemplate['settings'][idKey].default != undefined) {
       scforms['content' + idKey + basedata.deviceTemplateVersion] = deviceTemplate['settings'][idKey].default
     }
+
+    if (scforms['confirmed_' + idKey + basedata.deviceTemplateVersion] == undefined) {
+      scforms['confirmed_' + idKey + basedata.deviceTemplateVersion] = false
+    }
   }
   for (var idKey in deviceTemplate['commands']) {
     if (scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined && deviceTemplate['commands'][idKey].default != undefined) {
       scforms['content' + idKey + basedata.deviceTemplateVersion] = deviceTemplate['commands'][idKey].default
+    }
+    if (scforms['confirmed_' + idKey + basedata.deviceTemplateVersion] == undefined) {
+      scforms['confirmed_' + idKey + basedata.deviceTemplateVersion] = false
     }
   }
 }
@@ -184,7 +192,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
         content_length: idValue.length,
       }
       request('v1/device/queue', 'POST', data).then((resp) => {
-        addRecord(data.dev_eui, name, resp.Paylod, resp.Base64, resp.FCnt, data.confirmed)
+        addRecord(data.dev_eui, name, data.request_type, data.port, resp.Paylod, resp.Base64, resp.FCnt, data.confirmed)
         alert('request successful! ' + 'eui:' + data.dev_eui + ' name:' + name + 'FCnt: ' + resp.FCnt + '; bytes: ' + resp.Paylod + ' ; base64: ' + resp.Base64 + ' ; confirmed: ' + data.confirmed)
       }, (err) => {
         alert('request err :' + err)
@@ -278,11 +286,13 @@ interface Record {
   FCnt: Number
 }
 
-const addRecord = (devEUI, name, payload, base64, fCnt, confirmed) => {
+const addRecord = (devEUI, name, type, port, payload, base64, fCnt, confirmed) => {
   basedata.requestRecords.push({
     name: name,
     dateTime: (new Date).toISOString(),
     devEUI: devEUI,
+    type: type,
+    port: port,
     payload: payload,
     fCnt: fCnt,
     base64: base64,
