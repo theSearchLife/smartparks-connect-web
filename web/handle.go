@@ -123,7 +123,7 @@ func (h *Handler) handleAPI(w http.ResponseWriter, r *http.Request) {
 		FPort = 32
 	}
 	FCnt, err := h.grpcClient.DeviceEnqueue(ctx, serverParam, request.DevEui, uint32(FPort), request.Confirmed, byteData)
-	Resp(w, map[string]interface{}{"FCnt": FCnt, "Paylod": hex.EncodeToString(byteData), "Base64": base64.RawStdEncoding.EncodeToString(byteData)}, err)
+	Resp(w, map[string]interface{}{"FCnt": FCnt, "Payload": hex.EncodeToString(byteData), "Base64": base64.RawStdEncoding.EncodeToString(byteData)}, err)
 }
 
 func (h *Handler) handleRoot(w http.ResponseWriter, r *http.Request) {

@@ -54,6 +54,9 @@
             <el-button type="primary" @click="connectServerSubmit(formSRef)">Connect Server</el-button>
           </div>
         </el-form-item>
+        <div class="float_right">
+          <ClearCacheButton />
+        </div>
       </el-row>
 
     </el-form>
@@ -81,6 +84,7 @@
 </template>
 
 <script lang="ts" setup>
+import ClearCacheButton from './ClearCacheButton.vue';
 import { reactive, VueElement, ref, watch, onBeforeMount } from 'vue'
 import { request } from '../js/request'
 import { CascaderProps, popoverEmits } from 'element-plus'
