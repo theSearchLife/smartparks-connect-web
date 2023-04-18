@@ -95,7 +95,7 @@ import { request } from "@/js/request";
 import { Key } from '@element-plus/icons-vue';
 import type { FormInstance } from 'element-plus';
 import { filter } from 'lodash';
-import { reactive, ref, watch } from 'vue';
+import { reactive, ref } from 'vue';
 import ClearCacheButton from './ClearCacheButton.vue';
 const emit = defineEmits(["connectServer"]);
 const formSRef = ref<FormInstance>()
@@ -116,7 +116,6 @@ request('v1/template/list', "GET").then((resp) => {
   for (let i in resp) {
     deviceTemplates[i] = resp[i]
   }
-  console.log(deviceTemplates)
   initModel()
 }, (err) => {
   alert("device template load error:" + err)
@@ -139,10 +138,6 @@ const initModel = () => {
   getSet('formLogin', formLogin)
 }
 
-watch([formServer, formLogin], ([formServer, formLogin]) => {
-  lsave('formServer', formServer)
-  lsave('formLogin', formLogin)
-})
 const config = reactive({
   connected: false,
   dialogFormVisible: false,
@@ -153,6 +148,7 @@ const userLogin = () => {
   request('v1/login', 'POST', formLogin).then((resp) => {
     formServer.api_key = resp
     config.dialogFormVisible = false
+    lsave('formLogin', formLogin)
   }, (err) => {
     alert(err)
   })
@@ -175,6 +171,7 @@ const connectServerSubmit = (formEl) => {
           orgList.push({ "id": resp[i].id, "name": resp[i].name })
         }
         config.connected = true
+        lsave('formServer', formServer)
         ladd("connectedServers", formServer)
         emit('connectServer', formServer, config, orgList, deviceTemplates)
       }, (err) => {
@@ -187,7 +184,6 @@ const connectServerSubmit = (formEl) => {
 }
 
 const querySearch = (queryString: string, cb: any) => {
-  console.log(queryString)
   const results = filter(lget("connectedServers"), createFilter(queryString))
   // call callback function to return suggestions
   cb(results)
@@ -201,7 +197,6 @@ const createFilter = (queryString: string) => {
 }
 
 const handleSelect = (item) => {
-  console.log(item)
   formServer.api_key = item.api_key
   formServer.device_template = item.device_template
   formServer.server_url = item.server_url
