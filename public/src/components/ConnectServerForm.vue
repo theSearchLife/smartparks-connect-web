@@ -57,7 +57,7 @@
       <el-row>
         <el-form-item>
           <div class="button_right">
-            <el-button type="primary" class="el-button primary" @click="connectServerSubmit(formSRef)">Connect
+            <el-button type="primary" @click="connectServerSubmit(formSRef)">Connect
               Server</el-button>
           </div>
         </el-form-item>
