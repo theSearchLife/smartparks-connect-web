@@ -8,7 +8,7 @@
       </div>
     </template>
 
-    <el-form :model="formServer" status-icon inline ref="formSRef" label-width="150px">
+    <el-form :model="formServer" @submit.prevent status-icon inline ref="formSRef" label-width="150px">
       <el-row>
         <el-form-item label="Device Template" :width="500" prop="device_template" :rules="{
           required: true,
@@ -29,8 +29,8 @@
           required: true,
           trigger: 'blur',
         }">
-          <el-autocomplete v-model="formServer.server_url" name="serverURL" placeholder="host:port"
-            :fetch-suggestions="querySearch" @select="handleSelect" style="width: 350px;" />
+          <el-input v-model="formServer.server_url" id="server_url" name="server_url" placeholder="host:port"
+            autocomplete="on" style="width: 350px;" />
         </el-form-item>
       </el-row>
 
@@ -57,7 +57,8 @@
       <el-row>
         <el-form-item>
           <div class="button_right">
-            <el-button type="primary" @click="connectServerSubmit(formSRef)">Connect Server</el-button>
+            <el-button type="primary" class="el-button primary" @click="connectServerSubmit(formSRef)">Connect
+              Server</el-button>
           </div>
         </el-form-item>
         <div class="float_right">
@@ -70,9 +71,9 @@
   </el-card>
 
   <el-dialog v-model="config.dialogFormVisible" title="Get API Key By email and password">
-    <el-form :model="formLogin">
+    <el-form @submit.prevent :model="formLogin" label-width="120px">
       <el-form-item label="Email" required>
-        <el-input v-model="formLogin.email" />
+        <el-input v-model="formLogin.email" id="email" name="email" autocomplete="on" />
       </el-form-item>
       <el-form-item label="Password" required>
         <el-input type="password" v-model="formLogin.password" autocomplete="off" show-password />
@@ -90,11 +91,10 @@
 </template>
 
 <script lang="ts" setup>
-import { getSet, ladd, lget, lsave } from '@/js/localstore';
+import { getSet, lsave } from '@/js/localstore';
 import { request } from "@/js/request";
 import { Key } from '@element-plus/icons-vue';
 import type { FormInstance } from 'element-plus';
-import { filter } from 'lodash';
 import { reactive, ref } from 'vue';
 import ClearCacheButton from './ClearCacheButton.vue';
 const emit = defineEmits(["connectServer"]);
@@ -172,7 +172,6 @@ const connectServerSubmit = (formEl) => {
         }
         config.connected = true
         lsave('formServer', formServer)
-        ladd("connectedServers", formServer)
         emit('connectServer', formServer, config, orgList, deviceTemplates)
       }, (err) => {
         alert(err)
@@ -181,25 +180,6 @@ const connectServerSubmit = (formEl) => {
       return false
     }
   })
-}
-
-const querySearch = (queryString: string, cb: any) => {
-  const results = filter(lget("connectedServers"), createFilter(queryString))
-  // call callback function to return suggestions
-  cb(results)
-}
-const createFilter = (queryString: string) => {
-  return (item) => {
-    return (
-      item.server_url.toLowerCase().indexOf(queryString.toLowerCase()) === 0
-    )
-  }
-}
-
-const handleSelect = (item) => {
-  formServer.api_key = item.api_key
-  formServer.device_template = item.device_template
-  formServer.server_url = item.server_url
 }
 
 </script>
