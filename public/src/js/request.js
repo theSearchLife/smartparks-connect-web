@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { ElLoading } from 'element-plus'
+import { ElLoading } from 'element-plus';
 
 var loading;
 // Create an axios instance
 const instance = axios.create({
-  baseURL: '/api/',
+  baseURL: import.meta.env.MODE === 'development' ? 'http://localhost:8881/api/' : '/api/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
