@@ -18,8 +18,8 @@ h1 {
   text-align: center;
 }
 </style>
-<script>
-import Form from './components/Form.vue'
+<script lang="ts">
+import Form from './components/Form.vue';
 import Menu from './components/Menu.vue';
 
 export default {

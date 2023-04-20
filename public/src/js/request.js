@@ -2,6 +2,7 @@ import axios from 'axios';
 import { ElLoading } from 'element-plus';
 
 var loading;
+
 // Create an axios instance
 const instance = axios.create({
   baseURL: import.meta.env.MODE === 'development' ? 'http://localhost:8881/api/' : '/api/',
@@ -25,7 +26,6 @@ instance.interceptors.request.use(
 
 // Response interceptor
 instance.interceptors.response.use(
-
   response => {
     if (loading != null) {
       loading.close()

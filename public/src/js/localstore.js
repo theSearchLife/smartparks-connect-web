@@ -5,7 +5,6 @@ const getKey = (key) => {
 }
 
 export const lsave = (key, value) => {
-    console.log(key, value)
     let valueText = JSON.stringify(value)
     localStorage.setItem(getKey(key), valueText)
 }
