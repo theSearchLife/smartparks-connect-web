@@ -39,7 +39,7 @@
               <div>
                 <h2>{{ rtype }}</h2>
               </div>
-              <el-row :gutter="20" v-for="item, key in   basedata.deviceTemplate[rtype.toString()]">
+              <el-row :gutter="20" v-for="item, key in basedata.deviceTemplate[rtype.toString()]">
                 <el-form :inline="true" :ref="'formRef_' + key.toString()"
                   v-if="key.toString() != 'type' && key.toString() != 'port'">
                   <el-form-item>
