@@ -59,7 +59,7 @@
                   <el-form-item label="" prop="content" style="width: 100%; margin-right: 0;">
                     <el-input-number v-if="isNum(item.conversion) && item.length > 0"
                       v-model="scforms['content' + key.toString() + basedata.deviceTemplateVersion]" :max="item.max"
-                      :min="item.min"></el-input-number>
+                      :min="item.min" style="width:170px"></el-input-number>
                     <el-input v-if="(item.conversion == 'string' || item.conversion == 'byte_array') && item.length > 0"
                       v-model="scforms['content' + key.toString() + basedata.deviceTemplateVersion]" prop="content"
                       placeholder="input string" style="width: 100%;" />
@@ -103,7 +103,7 @@
 
 <script lang="ts" setup>
 import type { CascaderProps, FormInstance } from 'element-plus'
-import { ElNotification } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
 import { nextTick, reactive, ref, watch } from 'vue'
 import { getSet, lsave } from '../js/localstore'
 import { request } from "../js/request"
@@ -221,28 +221,23 @@ const doReq = (formRef, idKey, idValue, rtype) => {
           }
         }
         if (errors.length == results.length) {
-          ElNotification({
-            title: 'All requests failed!',
+
+          ElMessageBox.alert(errors.join("<br />"), 'All requests failed!', {
+            confirmButtonText: 'OK',
             dangerouslyUseHTMLString: true,
-            message: errors.join("<br />"),
-            type: 'error',
-            duration: 0,
+            type: "error",
           })
         } else if (errors.length > 0) {
-          ElNotification({
-            title: 'Some requests failed!',
+          ElMessageBox.alert([errors.join("<br />"), messages.join("<br />")].join("<br />"), 'Some requests failed!', {
+            confirmButtonText: 'OK',
             dangerouslyUseHTMLString: true,
-            message: errors.join("<br />") + "<br />" + messages.join("<br />"),
-            type: 'warning',
-            duration: 0,
+            type: "warning",
           })
         } else {
-          ElNotification({
-            title: 'All requests succeded!',
+          ElMessageBox.alert(messages.join("<br />"), 'All requests succeded!', {
+            confirmButtonText: 'OK',
             dangerouslyUseHTMLString: true,
-            message: messages.join("<br />"),
-            type: 'success',
-            duration: 0,
+            type: "success",
           })
         }
       })
