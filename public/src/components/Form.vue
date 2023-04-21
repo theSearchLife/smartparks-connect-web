@@ -15,10 +15,10 @@
             <el-alert title="Only activated devices will show in the list." type="success" />
             <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
               <el-form-item prop="data" :rules="{
-                required: true,
-                message: 'device can not be null',
-                trigger: 'blur',
-              }">
+                  required: true,
+                  message: 'device can not be null',
+                  trigger: 'blur',
+                }">
                 <el-cascader :props="props" v-model="formRequest.data" style="width:550px;" />
               </el-form-item>
             </el-col>
@@ -191,7 +191,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
         }
 
         const promise = request('v1/device/queue', 'POST', data).then((resp) => {
-          addRecord(data.dev_eui, name, data.request_type, data.port, resp.Paylod, resp.Base64, resp.FCnt, data.confirmed)
+          addRecord(data.dev_eui, name, data.request_type, data.port, resp.Payload, resp.Base64, resp.FCnt, data.confirmed)
           return {
             dev_eui: data.dev_eui,
             name: name,
@@ -217,7 +217,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
           let result = results[i]
           if ("error" in results[i]) {
             console.log("error", result)
-            errors.push(result.name + ": Error")
+            errors.push(result.name + `: Error (${result.error})`)
           } else {
             console.log("success", result)
             messages.push(result.name + ": Success")
