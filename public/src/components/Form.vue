@@ -222,19 +222,19 @@ const doReq = (formRef, idKey, idValue, rtype) => {
         }
         if (errors.length == results.length) {
 
-          ElMessageBox.alert(errors.join("<br />"), 'All requests failed!', {
+          ElMessageBox.alert(errors.join("<br /><br />"), 'All requests failed!', {
             confirmButtonText: 'OK',
             dangerouslyUseHTMLString: true,
             type: "error",
           })
         } else if (errors.length > 0) {
-          ElMessageBox.alert([errors.join("<br />"), messages.join("<br />")].join("<br />"), 'Some requests failed!', {
+          ElMessageBox.alert([errors.join("<br /><br />"), messages.join("<br /><br />")].join("<br /><br />"), 'Some requests failed!', {
             confirmButtonText: 'OK',
             dangerouslyUseHTMLString: true,
             type: "warning",
           })
         } else {
-          ElMessageBox.alert(messages.join("<br />"), 'All requests succeded!', {
+          ElMessageBox.alert(messages.join("<br /><br />"), 'All requests succeded!', {
             confirmButtonText: 'OK',
             dangerouslyUseHTMLString: true,
             type: "success",
