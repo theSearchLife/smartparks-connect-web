@@ -39,39 +39,36 @@
               <div>
                 <h2>{{ rtype }}</h2>
               </div>
-              <el-row :gutter="20" v-for="item, key in basedata.deviceTemplate[rtype.toString()]">
-                <el-form :inline="true" :ref="'formRef_' + key.toString()"
-                  v-if="key.toString() != 'type' && key.toString() != 'port'">
+              <el-row v-for="item, key in basedata.deviceTemplate[rtype.toString()]">
+                <el-form inline :ref="'formRef_' + key.toString()"
+                  v-if="key.toString() != 'type' && key.toString() != 'port'" style="width: 100%;display: flex;">
                   <el-form-item>
-                    <el-input :value="key" disabled></el-input>
+                    <div class="button_right">
+                      <el-button type="primary" @click="doReq(formRef, key, item, rtype)">Send Request</el-button>
+                    </div>
                   </el-form-item>
-                  <el-form-item label="" prop="content">
+                  <el-form-item label="confirmed">
+                    <el-switch v-model="scforms['confirmed_' + key.toString() + basedata.deviceTemplateVersion]"
+                      active-color="#13ce66" inactive-color="#ff4949">
+                    </el-switch>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-input :value="key" disabled style="min-width: 200px;"></el-input>
+                  </el-form-item>
+
+                  <el-form-item label="" prop="content" style="width: 100%; margin-right: 0;">
                     <el-input-number v-if="isNum(item.conversion) && item.length > 0"
                       v-model="scforms['content' + key.toString() + basedata.deviceTemplateVersion]" :max="item.max"
                       :min="item.min"></el-input-number>
                     <el-input v-if="(item.conversion == 'string' || item.conversion == 'byte_array') && item.length > 0"
                       v-model="scforms['content' + key.toString() + basedata.deviceTemplateVersion]" prop="content"
-                      placeholder="input string" style="min-width: 660px;" />
+                      placeholder="input string" style="width: 100%;" />
                     <el-radio-group v-if="item.conversion == 'bool' && item.length > 0"
                       v-model="scforms['content' + key.toString() + basedata.deviceTemplateVersion]">
                       <el-radio-button label="true" />
                       <el-radio-button label="false" />
                     </el-radio-group>
                   </el-form-item>
-
-                  <el-form-item label="confirmed">
-                    <el-switch v-model="scforms['confirmed_' + key.toString() + basedata.deviceTemplateVersion]"
-                      active-color="#13ce66" inactive-color="#ff4949">
-                    </el-switch>
-                  </el-form-item>
-
-
-                  <el-form-item>
-                    <div class="button_right">
-                      <el-button type="primary" @click="doReq(formRef, key, item, rtype)">Send Request</el-button>
-                    </div>
-                  </el-form-item>
-
                 </el-form>
               </el-row>
             </div>
