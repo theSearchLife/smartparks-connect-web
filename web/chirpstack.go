@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"html/template"
 	"log"
 	"net/http"
 	"time"
@@ -28,6 +27,7 @@ type Request struct {
 	Type    string      `json:"content_type"`
 	Content interface{} `json:"content"`
 }
+
 type ListRequest struct {
 	ServerUrl string `json:"server_url"`
 	ApiKey    string `json:"api_key"`
@@ -124,23 +124,4 @@ func (h *Handler) handleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	FCnt, err := h.grpcClient.DeviceEnqueue(ctx, serverParam, request.DevEui, uint32(FPort), request.Confirmed, byteData)
 	Resp(w, map[string]interface{}{"FCnt": FCnt, "Payload": hex.EncodeToString(byteData), "Base64": base64.RawStdEncoding.EncodeToString(byteData)}, err)
-}
-
-func (h *Handler) handleRoot(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("public/dist/index.html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	t.Execute(w, nil)
-}
-
-func (h *Handler) handleTemplateList(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	Succ(w, h.templateManager.GetTemplates())
 }

@@ -51,16 +51,23 @@ func ConvertBytes(idHex string, vtype VType, length uint8, content interface{}) 
 	}
 	return buf.Bytes(), nil
 }
+
+func ConvertRockBLOCKBytes(port uint8, idHex string, vtype VType, length uint8, content interface{}) (data []byte, err error) {
+	data, err = ConvertBytes(idHex, vtype, length, content)
+
+	data = append([]byte{port}, data...)
+	return
+}
+
 func hexSingleDecode(hexString string) (byte, error) {
-	if strings.HasPrefix(hexString, "0x") {
-		hexString = hexString[2:]
-	}
+	hexString = strings.TrimPrefix(hexString, "0x")
 	bs, err := hex.DecodeString(hexString)
 	if err != nil {
 		return 0, err
 	}
 	return bs[0], nil
 }
+
 func hexDecode(hexString string) ([]byte, error) {
 	return hex.DecodeString(hexString)
 }
@@ -70,6 +77,7 @@ func Uint32ToBytes(num uint32) []byte {
 	binary.LittleEndian.PutUint32(buf, num)
 	return buf
 }
+
 func Int32ToBytes(num int32) []byte {
 	buff := new(bytes.Buffer)
 	_ = binary.Write(buff, binary.LittleEndian, num)

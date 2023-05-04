@@ -6,23 +6,47 @@
 
       <el-card class="box-card" v-if="basedata.connected">
         <template #header>
-          <div class="card-header">
-            <span>Select Device</span>
-          </div>
+          <template v-if="basedata.connectionType === 'chirpstack'">
+            <div class="card-header">
+              <span>Select Device</span>
+            </div>
+          </template>
+          <template v-else>
+            <div class="card-header">
+              <span>Device IMEI</span>
+            </div>
+          </template>
+
         </template>
         <el-form :model="formRequest" ref="formRef">
-          <el-row>
-            <el-alert title="Only activated devices will show in the list." type="success" />
-            <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
-              <el-form-item prop="data" :rules="{
+          <template v-if="basedata.connectionType === 'chirpstack'">
+            <el-row>
+              <el-alert title="Only activated devices will show in the list." type="success" />
+              <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
+                <el-form-item prop="data" :rules="{
                   required: true,
                   message: 'device can not be null',
                   trigger: 'blur',
                 }">
-                <el-cascader :props="props" v-model="formRequest.data" style="width:550px;" />
-              </el-form-item>
-            </el-col>
-          </el-row>
+                  <el-cascader :props="available_devices" v-model="formRequest.data" style="width:550px;" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </template>
+          <template v-else>
+            <el-row>
+              <el-alert title="Please enter device IMEI." type="success" />
+              <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
+                <el-form-item label="IMEI" prop="imei" :rules="{
+                  required: true,
+                  message: 'Device IMEI can not be empty!',
+                  trigger: 'blur',
+                }">
+                  <el-input v-model="formRequest.imei" style="width:350px;" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </template>
         </el-form>
       </el-card>
 
@@ -112,19 +136,23 @@ import ConnectServerFrom from './ConnectServerForm.vue'
 const formRef = ref<FormInstance>()
 
 let basedata = reactive({
+  connectionType: "",
   connected: false,
   deviceTemplate: {
     ports: "",
   },
-  orgList: [],
+  available_devices: [],
   serverUrl: "",
   apiKey: "",
   requestRecords: [],
   deviceTemplateVersion: "",
+  username: "",
+  password: "",
 })
 let scforms = reactive({})
 let formRequest = reactive({
   data: [],
+  imei: ""
 })
 const initModel = () => {
   getSet('basedata', basedata)
@@ -161,24 +189,91 @@ watch([basedata, scforms, formRequest], ([basedata, scforms, formRequest]) => {
 const doReq = (formRef, idKey, idValue, rtype) => {
   formRef.validate((valid) => {
     if (valid) {
-      lsave('scforms', scforms)
       if (idValue.length > 0 && scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined) {
         alert('content can not be null')
         return
       }
+      lsave('scforms', scforms)
+      if (basedata.connectionType === "chirpstack") {
+        const promises = []
+        for (var i = 0; i < formRequest.data.length; i++) {
+          let formData = formRequest.data[i]
+          let tt = formData[2].split(":")
+          let dev_eui = tt[0]
+          let name = tt[1]
 
-      const promises = []
-      for (var i = 0; i < formRequest.data.length; i++) {
-        let formData = formRequest.data[i]
-        let tt = formData[2].split(":")
-        let dev_eui = tt[0]
-        let name = tt[1]
+          let data = {
+            server_url: basedata.serverUrl,
+            api_key: basedata.apiKey,
+            id: idValue.id,
+            dev_eui: dev_eui,
+            confirmed: scforms['confirmed_' + idKey + basedata.deviceTemplateVersion],
+            request_type: rtype,
+            port: basedata.deviceTemplate.ports[basedata.deviceTemplate[rtype].port],
+            content: replaceBytesToStr(scforms['content' + idKey + basedata.deviceTemplateVersion]),
+            content_type: idValue.conversion,
+            content_length: idValue.length,
+          }
 
+          const promise = request('v1/device/queue', 'POST', data).then((resp) => {
+            addRecord(data.dev_eui, name, data.request_type, data.port, resp.Payload, resp.Base64, resp.FCnt, data.confirmed)
+            return {
+              dev_eui: data.dev_eui,
+              name: name,
+              fcnt: resp.FCnt,
+              bytes: resp.Paylod,
+              base64: resp.Base64,
+              confirmed: data.confirmed
+            }
+          }, (err) => {
+            return {
+              dev_eui: data.dev_eui,
+              name: name,
+              error: err
+            }
+          })
+          promises.push(promise)
+        }
+
+        Promise.all(promises).then((results) => {
+          let errors = []
+          let messages = []
+          for (var i = 0; i < results.length; i++) {
+            let result = results[i]
+            if ("error" in results[i]) {
+              console.log("error", result)
+              errors.push(result.name + `: Error (${result.error})`)
+            } else {
+              console.log("success", result)
+              messages.push(result.name + ": Success")
+            }
+          }
+          if (errors.length == results.length) {
+            ElMessageBox.alert(errors.join("<br /><br />"), 'All requests failed!', {
+              confirmButtonText: 'OK',
+              dangerouslyUseHTMLString: true,
+              type: "error",
+            })
+          } else if (errors.length > 0) {
+            ElMessageBox.alert([errors.join("<br /><br />"), messages.join("<br /><br />")].join("<br /><br />"), 'Some requests failed!', {
+              confirmButtonText: 'OK',
+              dangerouslyUseHTMLString: true,
+              type: "warning",
+            })
+          } else {
+            ElMessageBox.alert(messages.join("<br /><br />"), 'All requests succeded!', {
+              confirmButtonText: 'OK',
+              dangerouslyUseHTMLString: true,
+              type: "success",
+            })
+          }
+        })
+      } else {
         let data = {
-          server_url: basedata.serverUrl,
-          api_key: basedata.apiKey,
+          username: basedata.username,
+          Password: basedata.password,
           id: idValue.id,
-          dev_eui: dev_eui,
+          imei: formRequest.imei,
           confirmed: scforms['confirmed_' + idKey + basedata.deviceTemplateVersion],
           request_type: rtype,
           port: basedata.deviceTemplate.ports[basedata.deviceTemplate[rtype].port],
@@ -187,60 +282,21 @@ const doReq = (formRef, idKey, idValue, rtype) => {
           content_length: idValue.length,
         }
 
-        const promise = request('v1/device/queue', 'POST', data).then((resp) => {
-          addRecord(data.dev_eui, name, data.request_type, data.port, resp.Payload, resp.Base64, resp.FCnt, data.confirmed)
-          return {
-            dev_eui: data.dev_eui,
-            name: name,
-            fcnt: resp.FCnt,
-            bytes: resp.Paylod,
-            base64: resp.Base64,
-            confirmed: data.confirmed
-          }
-        }, (err) => {
-          return {
-            dev_eui: data.dev_eui,
-            name: name,
-            error: err
-          }
-        })
-        promises.push(promise)
-      }
-
-      Promise.all(promises).then((results) => {
-        let errors = []
-        let messages = []
-        for (var i = 0; i < results.length; i++) {
-          let result = results[i]
-          if ("error" in results[i]) {
-            console.log("error", result)
-            errors.push(result.name + `: Error (${result.error})`)
-          } else {
-            console.log("success", result)
-            messages.push(result.name + ": Success")
-          }
-        }
-        if (errors.length == results.length) {
-
-          ElMessageBox.alert(errors.join("<br /><br />"), 'All requests failed!', {
-            confirmButtonText: 'OK',
-            dangerouslyUseHTMLString: true,
-            type: "error",
-          })
-        } else if (errors.length > 0) {
-          ElMessageBox.alert([errors.join("<br /><br />"), messages.join("<br /><br />")].join("<br /><br />"), 'Some requests failed!', {
-            confirmButtonText: 'OK',
-            dangerouslyUseHTMLString: true,
-            type: "warning",
-          })
-        } else {
-          ElMessageBox.alert(messages.join("<br /><br />"), 'All requests succeded!', {
+        request('v1/rockblock/queue', 'POST', data).then((resp) => {
+          addRecord(data.imei, "/", data.request_type, data.port, resp.Payload, resp.Base64, resp.FCnt, data.confirmed)
+          ElMessageBox.alert(data.imei + ": Success", 'All requests succeded!', {
             confirmButtonText: 'OK',
             dangerouslyUseHTMLString: true,
             type: "success",
           })
-        }
-      })
+        }, (err) => {
+          ElMessageBox.alert(err, 'Request failed!', {
+            confirmButtonText: 'OK',
+            dangerouslyUseHTMLString: true,
+            type: "error",
+          })
+        })
+      }
     }
   })
 }
@@ -251,11 +307,13 @@ const replaceBytesToStr = (bytes) => {
   }
   return bytes.replaceAll('{', '').replaceAll('}', '').replaceAll('0x', '').replaceAll(',', '').replaceAll(' ', '')
 }
-const connectServer = (formServer, config, orgList, deviceTemplates) => {
+const connectServer = (formServer, config, available_devices, deviceTemplates) => {
   basedata.apiKey = formServer.api_key
+  basedata.username = formServer.username
+  basedata.password = formServer.password
   basedata.deviceTemplate = deviceTemplates[formServer.device_template]
   basedata.deviceTemplateVersion = formServer.device_template
-  basedata.orgList = orgList
+  basedata.available_devices = available_devices
   basedata.connected = false
   nextTick(() => {
     basedata.connected = config.connected
@@ -268,12 +326,12 @@ const connectServer = (formServer, config, orgList, deviceTemplates) => {
 const isNum = (value) => {
   return value == 'uint8' || value == 'uint32' || value == 'int32' || value == 'float' || value == 'uint16' || value == 'int32'
 }
-const props: CascaderProps = {
+const available_devices: CascaderProps = {
   lazy: true,
   lazyLoad(node, resolve) {
     const { level } = node
     if (level == 0) {
-      const nodes = Array.from(basedata.orgList).map((item) => ({
+      const nodes = Array.from(basedata.available_devices).map((item) => ({
         value: item.id,
         label: item.name,
         leaf: false,
