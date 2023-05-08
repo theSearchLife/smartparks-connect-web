@@ -208,13 +208,11 @@ const connectServerSubmit = (formEl) => {
         request('v1/rockblock/login', 'POST', data).then((resp) => {
           config.connected = true
           emit('connectServer', formServer, config, available_devices, deviceTemplates)
-          console.log(resp)
+          lsave('formServer', formServer)
         }, (err) => {
-          console.log(err)
           alert(err)
         })
 
-        lsave('formServer', formServer)
       } else if (formServer.connection_type === 'chirpstack') {
         let data = {}
         data['server_url'] = formServer.server_url

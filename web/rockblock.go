@@ -99,7 +99,7 @@ func (h *Handler) handleRockBLOCKAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	fmt.Println(request)
+	// fmt.Println(request)
 
 	byteData, err := utils.ConvertRockBLOCKBytes(request.Port, request.ID, utils.VType(request.Type), request.Length, request.Content)
 	if err != nil {
@@ -107,26 +107,33 @@ func (h *Handler) handleRockBLOCKAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(byteData)
-	Resp(w, map[string]interface{}{"mtId": 0, "Payload": hex.EncodeToString(byteData), "Base64": base64.RawStdEncoding.EncodeToString(byteData)}, err)
+	// Create a new HTTP POST request with the RockBLOCK API endpoint URL
+	url := fmt.Sprintf("https://rockblock.rock7.com/rockblock/MT?username=%s&password=%s&data=0",
+		url.QueryEscape(request.Username),
+		url.QueryEscape(request.Password),
+	)
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", url, nil)
+	req.Header.Add("accept", "text/plain")
 
-	// req, err := http.NewRequest("POST", url, nil)
-	// if err != nil {
-	// 	Err(w, err)
-	// 	return
-	// }
+	// Send the request and parse the response
+	res, err := client.Do(req)
+	if err != nil {
+		Resp(w, nil, err)
+		return
+	}
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
 
-	// req.Header.Add("accept", "text/plain")
+	// Check the response for errors
+	if strings.HasPrefix(string(body), "FAILED") {
+		// Response is an error, get the code from the response message
+		parts := strings.SplitN(string(body), ",", 3)
 
-	// res, err := http.DefaultClient.Do(req)
-	// if err != nil {
-	// 	Err(w, err)
-	// 	return
-	// }
-	// defer res.Body.Close()
-	// body, err := ioutil.ReadAll(res.Body)
+		Resp(w, string(body), errors.New(parts[2]))
+		return
+	}
 
-	// fmt.Println(res)
-	// fmt.Println(string(body))
-	// Resp(w, map[string]interface{}{"response": string(body)}, err)
+	parts := strings.SplitN(string(body), ",", 2)
+	Resp(w, map[string]interface{}{"mtId": parts[1], "Payload": hex.EncodeToString(byteData), "Base64": base64.RawStdEncoding.EncodeToString(byteData)}, err)
 }
