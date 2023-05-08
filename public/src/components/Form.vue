@@ -321,12 +321,14 @@ const replaceBytesToStr = (bytes) => {
   return bytes.replaceAll('{', '').replaceAll('}', '').replaceAll('0x', '').replaceAll(',', '').replaceAll(' ', '')
 }
 const connectServer = (formServer, config, available_devices, deviceTemplates) => {
+  console.log("connected ----", formServer)
   basedata.apiKey = formServer.api_key
   basedata.username = formServer.username
   basedata.password = formServer.password
   basedata.deviceTemplate = deviceTemplates[formServer.device_template]
   basedata.deviceTemplateVersion = formServer.device_template
   basedata.available_devices = available_devices
+  basedata.connectionType = formServer.connection_type
   basedata.connected = false
   nextTick(() => {
     basedata.connected = config.connected

@@ -14,7 +14,7 @@
           message: 'Connection Type is required',
           trigger: 'blur',
         }">
-          <el-select v-model="formServer.connection_type" @change="console.log($event)" class="m-2" placeholder="Select">
+          <el-select v-model="formServer.connection_type" @change="reset_onnection" class="m-2" placeholder="Select">
             <el-option v-for="item in connection_options" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
@@ -195,6 +195,12 @@ const userLogin = () => {
     alert(err)
   })
 }
+
+const reset_onnection = () => {
+  config.connected = false
+  emit('connectServer', formServer, config, available_devices, deviceTemplates)
+}
+
 var available_devices = new Array;
 const connectServerSubmit = (formEl) => {
   if (!formEl) return
