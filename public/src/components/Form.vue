@@ -38,8 +38,8 @@
               <el-alert title="Please enter device IMEI." type="success" />
               <el-col :xs="24" :sm="24" :md="16" :lg="16" :xl="16">
                 <el-form-item label="IMEI" prop="imei" :rules="{
+                  validator: validateIMEI,
                   required: true,
-                  message: 'Device IMEI can not be empty!',
                   trigger: 'blur',
                 }">
                   <el-input v-model="formRequest.imei" style="width:350px;" />
@@ -186,6 +186,18 @@ watch([basedata, scforms, formRequest], ([basedata, scforms, formRequest]) => {
   lsave('scforms', scforms)
 })
 
+const validateIMEI = (_, value) => {
+  if (value === "" || value == null) {
+    return Promise.reject('Device IMEI can not be empty!');
+  } else {
+    const isValid = /^\d{15}$/.test(value);
+    if (!isValid) {
+      return Promise.reject('IMEI must be a 15-digit number');
+    }
+  }
+  return Promise.resolve();
+};
+
 const doReq = (formRef, idKey, idValue, rtype) => {
   formRef.validate((valid) => {
     if (valid) {
@@ -283,6 +295,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
         }
 
         request('v1/rockblock/queue', 'POST', data).then((resp) => {
+          console.log(resp)
           addRecord(data.imei, "/", data.request_type, data.port, resp.Payload, resp.Base64, resp.FCnt, data.confirmed)
           ElMessageBox.alert(data.imei + ": Success", 'All requests succeded!', {
             confirmButtonText: 'OK',
