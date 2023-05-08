@@ -108,9 +108,10 @@ func (h *Handler) handleRockBLOCKAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a new HTTP POST request with the RockBLOCK API endpoint URL
-	url := fmt.Sprintf("https://rockblock.rock7.com/rockblock/MT?username=%s&password=%s&data=0",
+	url := fmt.Sprintf("https://rockblock.rock7.com/rockblock/MT?username=%s&password=%s&data=%s",
 		url.QueryEscape(request.Username),
 		url.QueryEscape(request.Password),
+		url.QueryEscape(hex.EncodeToString(byteData)),
 	)
 	client := &http.Client{}
 	req, _ := http.NewRequest("POST", url, nil)
@@ -130,7 +131,7 @@ func (h *Handler) handleRockBLOCKAPI(w http.ResponseWriter, r *http.Request) {
 		// Response is an error, get the code from the response message
 		parts := strings.SplitN(string(body), ",", 3)
 
-		Resp(w, string(body), errors.New(parts[2]))
+		Resp(w, map[string]interface{}{"response": string(body), "request_data": hex.EncodeToString(byteData)}, errors.New(parts[2]))
 		return
 	}
 
