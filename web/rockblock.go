@@ -43,7 +43,7 @@ func (h *Handler) handleRockBLOCKLogin(w http.ResponseWriter, r *http.Request) {
 	var request RockBLOCKLoginRequest
 	err := decoder.Decode(&request)
 	if err != nil {
-		http.Error(w, "Invalid request body"+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -91,7 +91,7 @@ func (h *Handler) handleRockBLOCKAPI(w http.ResponseWriter, r *http.Request) {
 	var request RockBLOCKRequest
 	err := decoder.Decode(&request)
 	if err != nil {
-		http.Error(w, "Invalid request body"+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
