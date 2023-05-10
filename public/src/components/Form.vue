@@ -71,8 +71,9 @@
                       <el-button type="primary" @click="doReq(formRef, key, item, rtype)">Send Request</el-button>
                     </div>
                   </el-form-item>
-                  <el-form-item label="confirmed">
-                    <el-switch v-model="scforms['confirmed_' + key.toString() + basedata.deviceTemplateVersion]"
+                  <el-form-item :label="basedata.connectionType === 'chirpstack' ? 'Confirmed' : 'Flush'">
+                    <el-switch name="confirmed"
+                      v-model="scforms['confirmed_' + key.toString() + basedata.deviceTemplateVersion]"
                       active-color="#13ce66" inactive-color="#ff4949">
                     </el-switch>
                   </el-form-item>
@@ -297,7 +298,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
         request('v1/rockblock/queue', 'POST', data).then((resp) => {
           console.log(resp)
           addRecord(data.imei, "/", data.request_type, data.port, resp.Payload, resp.Base64, resp.FCnt, data.confirmed)
-          ElMessageBox.alert(data.imei + ": Success", 'All requests succeded!', {
+          ElMessageBox.alert(data.imei + ": Success", 'Request succeded!', {
             confirmButtonText: 'OK',
             dangerouslyUseHTMLString: true,
             type: "success",

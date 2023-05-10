@@ -85,9 +85,6 @@ func (h *Handler) handleRockBLOCKLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleRockBLOCKAPI(w http.ResponseWriter, r *http.Request) {
-	// url := "https://rockblock.rock7.com/rockblock/MT"
-
-	fmt.Println(r)
 	// Decode JSON data
 	decoder := json.NewDecoder(r.Body)
 
@@ -99,19 +96,25 @@ func (h *Handler) handleRockBLOCKAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// fmt.Println(request)
-
 	byteData, err := utils.ConvertRockBLOCKBytes(request.Port, request.ID, utils.VType(request.Type), request.Length, request.Content)
 	if err != nil {
 		Err(w, err)
 		return
 	}
 
+	// We reuse confirmed from Chirpstack as Flush value
+	flush := "no"
+	if request.Confirmed {
+		flush = "yes"
+	}
+
 	// Create a new HTTP POST request with the RockBLOCK API endpoint URL
-	url := fmt.Sprintf("https://rockblock.rock7.com/rockblock/MT?username=%s&password=%s&data=%s",
+	url := fmt.Sprintf("https://rockblock.rock7.com/rockblock/MT?username=%s&password=%s&data=%s&flush=%s&imei=%s",
 		url.QueryEscape(request.Username),
 		url.QueryEscape(request.Password),
 		url.QueryEscape(hex.EncodeToString(byteData)),
+		url.QueryEscape(flush),
+		url.QueryEscape(request.IMEI),
 	)
 	client := &http.Client{}
 	req, _ := http.NewRequest("POST", url, nil)
