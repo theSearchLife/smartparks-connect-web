@@ -75,25 +75,30 @@ func (h *Handler) handleRockBLOCKLogin(w http.ResponseWriter, r *http.Request) {
 		}
 		// Other error codes are ignored at this stage, since we are not actually sending data to any device, we just
 		// want to check if credentials are correct
-		// http.Error(w, string(body), http.StatusBadRequest)
-		// Resp(w, nil, errors.New(parts[2]))
-		// return
 	}
 
 	Resp(w, nil, nil)
 }
 
-func (h *Handler) handleRockBLOCKAPI(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleRockBLOCKQueue(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	// Decode JSON data
 	decoder := json.NewDecoder(r.Body)
-
 	var request RockBLOCKRequest
 	err := decoder.Decode(&request)
 	if err != nil {
 		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	defer r.Body.Close()
+	if request.Port == 0 || request.ID == "" || request.Type == "" || request.Length == 0 || request.Content == "" {
+		http.Error(w, "missing one or more of required parameters: port, content, content_type, id, type", http.StatusBadRequest)
+		return
+	}
 
 	byteData, err := utils.ConvertRockBLOCKBytes(request.Port, request.ID, utils.VType(request.Type), request.Length, request.Content)
 	if err != nil {

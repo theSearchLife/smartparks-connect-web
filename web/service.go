@@ -54,7 +54,7 @@ func StartHttpServer() {
 	http.Handle("/api/v1/template/list", cors(http.HandlerFunc(handle.handleTemplateList)))
 
 	// RockBLOCK API
-	http.Handle("/api/v1/rockblock/queue", cors(http.HandlerFunc(handle.handleRockBLOCKAPI)))
+	http.Handle("/api/v1/rockblock/queue", cors(http.HandlerFunc(handle.handleRockBLOCKQueue)))
 	http.Handle("/api/v1/rockblock/login", cors(http.HandlerFunc(handle.handleRockBLOCKLogin)))
 
 	http.Handle("/assets/device_template/", http.StripPrefix("/assets/device_template/", http.FileServer(http.Dir("template_files"))))

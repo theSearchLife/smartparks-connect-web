@@ -60,6 +60,9 @@ func ConvertRockBLOCKBytes(port uint8, idHex string, vtype VType, length uint8, 
 }
 
 func hexSingleDecode(hexString string) (byte, error) {
+	if hexString == "" {
+		return 0, errors.New("cannot decode empty string")
+	}
 	hexString = strings.TrimPrefix(hexString, "0x")
 	bs, err := hex.DecodeString(hexString)
 	if err != nil {
