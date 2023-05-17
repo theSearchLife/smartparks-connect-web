@@ -9,6 +9,20 @@ import (
 	"github.com/SmartParksOrg/smartparks-connect-web/grpc_client"
 )
 
+type Handler struct {
+	httpClient      *http.Client
+	grpcClient      *grpc_client.GrpcClient
+	templateManager *device_template.TemplateManager
+}
+
+func NewHandler() *Handler {
+	return &Handler{
+		httpClient:      http.DefaultClient,
+		grpcClient:      grpc_client.NewGrpcClient(),
+		templateManager: device_template.NewTemplateManager(),
+	}
+}
+
 // handleRoot handles requests to the root URL ("/").
 func (h *Handler) handleRoot(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("public/dist/index.html")
@@ -30,11 +44,10 @@ func (h *Handler) handleTemplateList(w http.ResponseWriter, r *http.Request) {
 	Succ(w, h.templateManager.GetTemplates())
 }
 
-func StartHttpServer(client *grpc_client.GrpcClient, template *device_template.TemplateManager) {
-	handle := Handler{
-		grpcClient:      client,
-		templateManager: template,
-	}
+func StartHttpServer() {
+	handle := NewHandler()
+	handle.templateManager.ScanTemplateDir()
+
 	http.Handle("/api/v1/login", cors(http.HandlerFunc(handle.handleLogin)))
 	http.Handle("/api/v1/device/queue", cors(http.HandlerFunc(handle.handleAPI)))
 	http.Handle("/api/v1/list", cors(http.HandlerFunc(handle.handleList)))

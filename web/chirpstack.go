@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/SmartParksOrg/smartparks-connect-web/device_template"
 	"github.com/SmartParksOrg/smartparks-connect-web/grpc_client"
 	"github.com/SmartParksOrg/smartparks-connect-web/utils"
 )
@@ -39,11 +38,6 @@ type LoginRequest struct {
 	ServerUrl string `json:"server_url"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
-}
-
-type Handler struct {
-	grpcClient      *grpc_client.GrpcClient
-	templateManager *device_template.TemplateManager
 }
 
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -91,6 +85,7 @@ func (h *Handler) handleList(w http.ResponseWriter, r *http.Request) {
 	}
 	Resp(w, list, err)
 }
+
 func (h *Handler) handleAPI(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

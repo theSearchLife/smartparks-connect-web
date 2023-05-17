@@ -52,12 +52,11 @@ func (h *Handler) handleRockBLOCKLogin(w http.ResponseWriter, r *http.Request) {
 		url.QueryEscape(request.Username),
 		url.QueryEscape(request.Password),
 	)
-	client := &http.Client{}
 	req, _ := http.NewRequest("POST", url, nil)
 	req.Header.Add("accept", "text/plain")
 
 	// Send the request and parse the response
-	res, err := client.Do(req)
+	res, err := h.httpClient.Do(req)
 	if err != nil {
 		Resp(w, nil, err)
 		return
@@ -116,7 +115,7 @@ func (h *Handler) handleRockBLOCKAPI(w http.ResponseWriter, r *http.Request) {
 		url.QueryEscape(flush),
 		url.QueryEscape(request.IMEI),
 	)
-	client := &http.Client{}
+	client := h.httpClient
 	req, _ := http.NewRequest("POST", url, nil)
 	req.Header.Add("accept", "text/plain")
 
