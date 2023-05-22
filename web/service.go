@@ -41,7 +41,7 @@ func (h *Handler) handleTemplateList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Succ(w, h.templateManager.GetTemplates())
+	Resp(w, h.templateManager.GetTemplates(), nil)
 }
 
 func StartHttpServer() {
