@@ -304,7 +304,9 @@ const doReq = (formRef, idKey, idValue, rtype) => {
             type: "success",
           })
         }, (err) => {
-          ElMessageBox.alert(err, 'Request failed!', {
+          console.log(err)
+          let error_message = data.imei + ": " + err.response.data.err_msg
+          ElMessageBox.alert(error_message, 'Request failed!', {
             confirmButtonText: 'OK',
             dangerouslyUseHTMLString: true,
             type: "error",

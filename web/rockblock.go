@@ -97,9 +97,9 @@ func (h *Handler) handleRockBLOCKQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if request.Port == 0 || request.ID == "" || request.Type == "" || request.Length == 0 {
+	if request.Port == 0 || request.ID == "" || request.Type == "" {
 		// w.WriteHeader(http.StatusBadRequest)
-		Resp(w, nil, errors.New("missing one or more of required parameters: port, content_type, id, type"))
+		Resp(w, nil, errors.New("missing one or more of required parameters: port, content_type, id, request_type"))
 		return
 	}
 
