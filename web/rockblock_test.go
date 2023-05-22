@@ -64,7 +64,7 @@ func TestHandleRockBLOCKLoginERROR(t *testing.T) {
 	h.handleRockBLOCKLogin(rr, req)
 
 	// Check that the expected response was returned
-	assert.Equal(t, http.StatusOK, rr.Result().StatusCode)
+	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
 	expectedResponse := "{\"code\":500,\"result\":null,\"err_msg\":\"Invalid login credentials\"}\n"
 	assert.Equal(t, expectedResponse, rr.Body.String())
 
@@ -119,7 +119,7 @@ func TestHandleRockBLOCKLoginERROR(t *testing.T) {
 	h.handleRockBLOCKLogin(rr, req)
 
 	// Check that the expected response was returned
-	assert.Equal(t, http.StatusOK, rr.Result().StatusCode)
+	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
 	expectedResponse = "{\"code\":500,\"result\":null,\"err_msg\":\"Post \\\"https://rockblock.rock7.com/rockblock/MT?username=testuser\\u0026password=testpass\\u0026data=0\\\": test network error\"}\n"
 	assert.Equal(t, expectedResponse, rr.Body.String())
 }
@@ -179,8 +179,8 @@ func TestHandleRockBLOCKQueueIncompleteRequestData(t *testing.T) {
 	h.handleRockBLOCKQueue(rr, req)
 
 	// Check that the expected response was returned
-	assert.Equal(t, http.StatusBadRequest, rr.Result().StatusCode)
-	expectedResponse := "missing one or more of required parameters: port, content, content_type, id, type\n"
+	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
+	expectedResponse := "{\"code\":500,\"result\":null,\"err_msg\":\"missing one or more of required parameters: port, content_type, id, type\"}\n"
 	assert.Equal(t, expectedResponse, rr.Body.String())
 }
 
@@ -204,7 +204,7 @@ func TestHandleRockBLOCKQueueInvalidRequestData(t *testing.T) {
 
 	h.handleRockBLOCKQueue(rr, req)
 	// Check that the expected response was returned
-	assert.Equal(t, http.StatusOK, rr.Result().StatusCode)
+	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
 	assert.Contains(t, rr.Body.String(), "Invalid request body:")
 }
 
@@ -227,7 +227,7 @@ func TestHandleRockBLOCKQueueNetworkError(t *testing.T) {
 	h.handleRockBLOCKQueue(rr, req)
 
 	// Check that the expected response was returned
-	assert.Equal(t, http.StatusOK, rr.Result().StatusCode)
+	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
 	expectedResponse := "{\"code\":500,\"result\":null,\"err_msg\":\"Post \\\"https://rockblock.rock7.com/rockblock/MT?username=testuser\\u0026password=testpass\\u0026data=03010400000000\\u0026flush=no\\u0026imei=123451234512345\\\": test network error\"}\n"
 	assert.Equal(t, expectedResponse, rr.Body.String())
 }
@@ -275,7 +275,7 @@ func TestHandleRockBLOCKQueueSuccessful(t *testing.T) {
 	h.handleRockBLOCKQueue(rr, req)
 
 	// Check that the expected response was returned
-	assert.Equal(t, http.StatusOK, rr.Result().StatusCode)
+	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
 	expectedResponse := "{\"code\":500,\"result\":{\"request_data\":\"03010400000000\",\"response\":\"FAILED,10,Invalid login credentials\"},\"err_msg\":\"Invalid login credentials\"}\n"
 	assert.Equal(t, expectedResponse, rr.Body.String())
 

@@ -92,17 +92,21 @@ func (h *Handler) handleRockBLOCKQueue(w http.ResponseWriter, r *http.Request) {
 	var request RockBLOCKRequest
 	err := decoder.Decode(&request)
 	if err != nil {
-		http.Error(w, "Invalid request body: "+err.Error(), http.StatusBadRequest)
+		Resp(w, nil, errors.New("Invalid request body: "+err.Error()))
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if request.Port == 0 || request.ID == "" || request.Type == "" || request.Length == 0 || request.Content == "" {
-		http.Error(w, "missing one or more of required parameters: port, content, content_type, id, type", http.StatusBadRequest)
+
+	if request.Port == 0 || request.ID == "" || request.Type == "" || request.Length == 0 {
+		// w.WriteHeader(http.StatusBadRequest)
+		Resp(w, nil, errors.New("missing one or more of required parameters: port, content_type, id, type"))
 		return
 	}
 
 	byteData, err := utils.ConvertRockBLOCKBytes(request.Port, request.ID, utils.VType(request.Type), request.Length, request.Content)
 	if err != nil {
-		Err(w, err)
+		// w.WriteHeader(500)
+		Resp(w, nil, err)
 		return
 	}
 
