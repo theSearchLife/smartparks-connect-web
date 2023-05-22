@@ -101,7 +101,7 @@ func (h *Handler) handleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	byteData, err := utils.ConvertBytes(request.ID, utils.VType(request.Type), request.Length, request.Content)
 	if err != nil {
-		Err(w, err)
+		Resp(w, nil, err)
 		return
 	}
 	log.Printf("convert bytes : %s ", hex.EncodeToString(byteData))

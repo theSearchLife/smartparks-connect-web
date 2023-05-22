@@ -56,11 +56,3 @@ func Resp(writer http.ResponseWriter, result interface{}, err error) {
 		json.NewEncoder(writer).Encode(resp)
 	}
 }
-
-func Succ(writer http.ResponseWriter, result interface{}) {
-	Resp(writer, result, nil)
-}
-
-func Err(write http.ResponseWriter, err error) {
-	Resp(write, nil, err)
-}
