@@ -255,7 +255,11 @@ const doReq = (formRef, idKey, idValue, rtype) => {
             let result = results[i]
             if ("error" in results[i]) {
               console.log("error", result)
-              errors.push(result.name + `: Error (${result.error})`)
+              if (result.error.response) {
+                errors.push(result.name + `: Error (${result.error.response.data.err_msg})`)
+              } else {
+                errors.push(result.name + `: Error (${result.error})`)
+              }
             } else {
               console.log("success", result)
               messages.push(result.name + ": Success")

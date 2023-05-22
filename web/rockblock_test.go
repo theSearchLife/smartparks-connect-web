@@ -180,7 +180,7 @@ func TestHandleRockBLOCKQueueIncompleteRequestData(t *testing.T) {
 
 	// Check that the expected response was returned
 	assert.Equal(t, http.StatusInternalServerError, rr.Result().StatusCode)
-	expectedResponse := "{\"code\":500,\"result\":null,\"err_msg\":\"missing one or more of required parameters: port, content_type, id, type\"}\n"
+	expectedResponse := "{\"code\":500,\"result\":null,\"err_msg\":\"missing one or more of required parameters: port, content_type, id, request_type\"}\n"
 	assert.Equal(t, expectedResponse, rr.Body.String())
 }
 
