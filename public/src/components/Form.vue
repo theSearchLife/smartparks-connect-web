@@ -203,7 +203,11 @@ const doReq = (formRef, idKey, idValue, rtype) => {
   formRef.validate((valid) => {
     if (valid) {
       if (idValue.length > 0 && scforms['content' + idKey + basedata.deviceTemplateVersion] == undefined) {
-        alert('content can not be null')
+        ElMessageBox.alert('Content can not be null!', 'Request failed!', {
+          confirmButtonText: 'OK',
+          dangerouslyUseHTMLString: true,
+          type: "error",
+        })
         return
       }
       lsave('scforms', scforms)
@@ -396,7 +400,15 @@ const listRequest = (node, resolve, type) => {
       resolve([])
     }
   }, (err) => {
-    alert(err)
+    let error_message = err
+    if (err.response) {
+      error_message = err.response.data.err_msg
+    }
+    ElMessageBox.alert(error_message, 'Request failed!', {
+      confirmButtonText: 'OK',
+      dangerouslyUseHTMLString: true,
+      type: "error",
+    })
   })
 }
 

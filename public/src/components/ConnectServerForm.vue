@@ -88,8 +88,7 @@
       <el-row>
         <el-form-item>
           <div class="button_right">
-            <el-button type="primary" @click="connectServerSubmit(formSRef)">Connect
-              Server</el-button>
+            <el-input type="submit" @click="connectServerSubmit(formSRef)" value="Connect Server" />
           </div>
         </el-form-item>
         <div class="float_right">
@@ -148,7 +147,15 @@ request('v1/template/list', "GET").then((resp) => {
   }
   initModel()
 }, (err) => {
-  alert("device template load error:" + err)
+  let error_message = err
+  if (err.response) {
+    error_message = err.response.data.err_msg
+  }
+  ElMessageBox.alert(error_message, 'Request failed!', {
+    confirmButtonText: 'OK',
+    dangerouslyUseHTMLString: true,
+    type: "error",
+  })
 })
 
 const connection_options = [
@@ -193,7 +200,15 @@ const userLogin = () => {
     config.dialogFormVisible = false
     lsave('formLogin', formLogin)
   }, (err) => {
-    alert(err)
+    let error_message = err
+    if (err.response) {
+      error_message = err.response.data.err_msg
+    }
+    ElMessageBox.alert(error_message, 'Request failed!', {
+      confirmButtonText: 'OK',
+      dangerouslyUseHTMLString: true,
+      type: "error",
+    })
   })
 }
 
