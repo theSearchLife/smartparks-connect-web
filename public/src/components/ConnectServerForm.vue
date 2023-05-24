@@ -124,6 +124,7 @@ import { getSet, lsave } from '@/js/localstore';
 import { request } from "@/js/request";
 import { Key } from '@element-plus/icons-vue';
 import type { FormInstance } from 'element-plus';
+import { ElMessageBox } from 'element-plus';
 import { reactive, ref } from 'vue';
 import ClearCacheButton from './ClearCacheButton.vue';
 const emit = defineEmits(["connectServer"]);
@@ -216,9 +217,16 @@ const connectServerSubmit = (formEl) => {
           emit('connectServer', formServer, config, available_devices, deviceTemplates)
           lsave('formServer', formServer)
         }, (err) => {
-          alert(err)
+          let error_message = err
+          if (err.response) {
+            error_message = err.response.data.err_msg
+          }
+          ElMessageBox.alert(error_message, 'Request failed!', {
+            confirmButtonText: 'OK',
+            dangerouslyUseHTMLString: true,
+            type: "error",
+          })
         })
-
       } else if (formServer.connection_type === 'chirpstack') {
         let data = {}
         data['server_url'] = formServer.server_url
@@ -233,7 +241,15 @@ const connectServerSubmit = (formEl) => {
           lsave('formServer', formServer)
           emit('connectServer', formServer, config, available_devices, deviceTemplates)
         }, (err) => {
-          alert(err)
+          let error_message = err
+          if (err.response) {
+            error_message = err.response.data.err_msg
+          }
+          ElMessageBox.alert(error_message, 'Request failed!', {
+            confirmButtonText: 'OK',
+            dangerouslyUseHTMLString: true,
+            type: "error",
+          })
         })
       }
     } else {
