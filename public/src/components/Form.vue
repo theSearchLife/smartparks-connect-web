@@ -42,7 +42,7 @@
                   required: true,
                   trigger: 'blur',
                 }">
-                  <el-input v-model="formRequest.imei" style="width:350px;" />
+                  <el-input v-model="formRequest.imei" id="imei" name="imei" autocomplete="on" style="width:350px;" />
                 </el-form-item>
               </el-col>
             </el-row>
