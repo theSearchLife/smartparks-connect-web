@@ -97,31 +97,17 @@
                 </el-form>
               </el-row>
             </div>
-
           </el-tab-pane>
         </el-tabs>
       </el-card>
     </el-tab-pane>
     <el-tab-pane label="Request Records">
-      <el-card class="box-card" v-if="basedata.connected">
-        <template #header>
-          <div class="card-header">
-            <span>Request Records</span>
-          </div>
-        </template>
-
-        <el-table show-header :data="basedata.requestRecords" stripe>
-          <el-table-column prop="dateTime" label="Date + Time" />
-          <el-table-column prop="name" label="Name" />
-          <el-table-column prop="devEUI" label="EUI" />
-          <el-table-column prop="type" label="Type" />
-          <el-table-column prop="port" label="Port" />
-          <el-table-column prop="payload" label="Payload (hex)" />
-          <el-table-column prop="base64" label="Payload (base64)" />
-          <el-table-column prop="fCnt" label="FCnt" />
-          <el-table-column prop="confirmed" label="Confirmed" />
-        </el-table>
-      </el-card>
+      <template v-if="basedata.connected">
+        <RockBLOCKRequests :requestRecords="basedata.rockBlockRequests" v-if="basedata.connectionType === 'rockblock'">
+        </RockBLOCKRequests>
+        <ChirpstackRequests :requestRecords="basedata.chipstackRequests" v-if="basedata.connectionType === 'chirpstack'">
+        </ChirpstackRequests>
+      </template>
     </el-tab-pane>
   </el-tabs>
 </template>
@@ -134,6 +120,8 @@ import { getSet, lsave } from '../js/localstore'
 import { request } from "../js/request"
 
 import ConnectServerFrom from './ConnectServerForm.vue'
+import ChirpstackRequests from './RequestHistory/ChirpstackRequests.vue'
+import RockBLOCKRequests from './RequestHistory/RockBLOCKRequests.vue'
 const formRef = ref<FormInstance>()
 
 let basedata = reactive({
@@ -145,7 +133,8 @@ let basedata = reactive({
   available_devices: [],
   serverUrl: "",
   apiKey: "",
-  requestRecords: [],
+  rockBLOCKRequests: [],
+  chipstackRequests: [],
   deviceTemplateVersion: "",
   username: "",
   password: "",
@@ -233,7 +222,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
           }
 
           const promise = request('v1/device/queue', 'POST', data).then((resp) => {
-            addRecord(data.dev_eui, name, data.request_type, data.port, resp.Payload, resp.Base64, resp.FCnt, data.confirmed)
+            addChirpstackRequest(data.dev_eui, name, data.request_type, data.port, resp.Payload, resp.Base64, resp.FCnt, data.confirmed)
             return {
               dev_eui: data.dev_eui,
               name: name,
@@ -305,7 +294,7 @@ const doReq = (formRef, idKey, idValue, rtype) => {
 
         request('v1/rockblock/queue', 'POST', data).then((resp) => {
           console.log(resp)
-          addRecord(data.imei, "/", data.request_type, data.port, resp.Payload, resp.Base64, resp.FCnt, data.confirmed)
+          addRockBLOCKRequest(data.imei, data.request_type, data.port, resp.Payload, resp.Base64, resp.mtId, data.confirmed)
           ElMessageBox.alert(data.imei + ": Success", 'Request succeded!', {
             confirmButtonText: 'OK',
             dangerouslyUseHTMLString: true,
@@ -412,8 +401,12 @@ const listRequest = (node, resolve, type) => {
   })
 }
 
-const addRecord = (devEUI, name, type, port, payload, base64, fCnt, confirmed) => {
-  basedata.requestRecords.push({
+const addChirpstackRequest = (devEUI, name, type, port, payload, base64, fCnt, confirmed) => {
+  // Check if chipstackRequests exists in basedata, if not create an ampty array
+  if (basedata.chipstackRequests == undefined) {
+    basedata.chipstackRequests = []
+  }
+  basedata.chipstackRequests.push({
     name: name,
     dateTime: (new Date).toISOString(),
     devEUI: devEUI,
@@ -423,6 +416,22 @@ const addRecord = (devEUI, name, type, port, payload, base64, fCnt, confirmed) =
     fCnt: fCnt,
     base64: base64,
     confirmed: confirmed,
+  })
+}
+const addRockBLOCKRequest = (IMEI, type, port, payload, base64, messageID, flush) => {
+  // Check if rockBLOCKRequests exists in basedata, if not create an ampty array
+  if (basedata.rockBLOCKRequests == undefined) {
+    basedata.rockBLOCKRequests = []
+  }
+  basedata.rockBLOCKRequests.push({
+    dateTime: (new Date).toISOString(),
+    IMEI: IMEI,
+    type: type,
+    port: port,
+    payload: payload,
+    messageID: messageID,
+    base64: base64,
+    flush: flush,
   })
 }
 </script>

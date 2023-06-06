@@ -186,6 +186,7 @@ const formLogin = reactive({
 const initModel = () => {
   getSet('formServer', formServer)
   getSet('formLogin', formLogin)
+  emit('connectServer', formServer, config, available_devices, deviceTemplates)
 }
 
 const config = reactive({
