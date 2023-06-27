@@ -103,7 +103,7 @@
     </el-tab-pane>
     <el-tab-pane label="Request Records">
       <template v-if="basedata.connected">
-        <RockBLOCKRequests :requestRecords="basedata.rockBlockRequests" v-if="basedata.connectionType === 'rockblock'">
+        <RockBLOCKRequests :requestRecords="basedata.rockBLOCKRequests" v-if="basedata.connectionType === 'rockblock'">
         </RockBLOCKRequests>
         <ChirpstackRequests :requestRecords="basedata.chipstackRequests" v-if="basedata.connectionType === 'chirpstack'">
         </ChirpstackRequests>
