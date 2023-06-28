@@ -8,13 +8,12 @@
 
         <el-table show-header :data="requestRecords" stripe>
             <el-table-column prop="dateTime" label="Date + Time" />
-            <el-table-column prop="devEUI" label="IMEI" />
+            <el-table-column prop="IMEI" label="IMEI" />
             <el-table-column prop="type" label="Type" />
-            <el-table-column prop="port" label="Port" />
             <el-table-column prop="payload" label="Payload (hex)" />
             <el-table-column prop="base64" label="Payload (base64)" />
-            <el-table-column prop="fCnt" label="Message ID" />
-            <el-table-column prop="confirmed" label="Flush" />
+            <el-table-column prop="messageID" label="Message ID" />
+            <el-table-column prop="flush" label="Flush" />
         </el-table>
     </el-card>
 </template>
