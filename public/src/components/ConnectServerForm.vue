@@ -7,70 +7,98 @@
             Connected</el-tag></span>
       </div>
     </template>
-
     <el-form :model="formServer" @submit.prevent status-icon inline ref="formSRef" label-width="150px">
+      <el-row>
+        <el-form-item label="Connection Type" prop="connection_type" :width="500" :rules="{
+          required: true,
+          message: 'Connection Type is required',
+          trigger: 'blur',
+        }">
+          <el-select v-model="formServer.connection_type" @change="reset_onnection" class="m-2" placeholder="Select">
+            <el-option v-for="item in connection_options" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+      </el-row>
       <el-row>
         <el-form-item label="Device Template" :width="500" prop="device_template" :rules="{
           required: true,
           message: 'Device Template is required',
           trigger: 'blur',
         }">
-          <el-select v-model="formServer.device_template" class="m-2" placeholder="Select" @change="changeTemplate"
+          <el-select v-model="formServer.device_template" class="m-2" placeholder="Select"
+            @change="$emit('connectServer', formServer, config, available_devices, deviceTemplates)"
             style="width: 350px;">
-            <el-option v-for="item, key in deviceTemplates" :key="key" :label="key" :value="key" />
+            <el-option v-for="_, key in deviceTemplates" :key="key" :label="key" :value="key" />
           </el-select>
         </el-form-item>
       </el-row>
+      <template v-if="formServer.connection_type === 'chirpstack'">
+        <el-row>
+          <el-form-item label="Server Address" prop="server_url" :rules="{
+            validator: validateGrpcHostPort,
+            required: true,
+            trigger: 'blur',
+          }">
+            <el-input v-model="formServer.server_url" id="server_url" name="server_url" placeholder="host:port"
+              autocomplete="on" style="width: 350px;" />
+          </el-form-item>
+        </el-row>
 
+        <el-row>
+          <el-form-item label="API Key" prop="api_key" :rules="{
+            required: true,
+            message: 'API Key is required',
+            trigger: 'blur',
+          }">
+            <el-input v-model="formServer.api_key" type="password" show-password style="width: 350px;"></el-input>
+          </el-form-item>
 
-      <el-row>
-        <el-form-item label="Server Address" prop="server_url" :rules="{
-          validator: validateGrpcHostPort,
-          required: true,
-          trigger: 'blur',
-        }">
-          <el-input v-model="formServer.server_url" id="server_url" name="server_url" placeholder="host:port"
-            autocomplete="on" style="width: 350px;" />
-        </el-form-item>
-      </el-row>
-
-      <el-row>
-        <el-form-item label="API Key" prop="api_key" :rules="{
-          required: true,
-          message: 'API Key is required',
-          trigger: 'blur',
-        }">
-          <el-input v-model="formServer.api_key" type="password" show-password style="width: 350px;"></el-input>
-        </el-form-item>
-
-        <el-form-item>
-          <el-popover placement="bottom" title="Get API Key" :width="200" trigger="hover"
-            content="Click this button to obtain a valid API key using your server email and password">
-            <template #reference>
-              <el-button type="danger" :icon="Key" @click="config.dialogFormVisible = true">Get ApiKey</el-button>
-            </template>
-          </el-popover>
-        </el-form-item>
-      </el-row>
-
-
+          <el-form-item>
+            <el-popover placement="bottom" title="Get API Key" :width="200" trigger="hover"
+              content="Click this button to obtain a valid API key using your server email and password">
+              <template #reference>
+                <el-button type="danger" :icon="Key" @click="config.dialogFormVisible = true">Get ApiKey</el-button>
+              </template>
+            </el-popover>
+          </el-form-item>
+        </el-row>
+      </template>
+      <template v-else>
+        <el-row>
+          <el-form-item label="Username" prop="username" :rules="{
+            required: true,
+            message: 'Username is required',
+            trigger: 'blur',
+          }">
+            <el-input v-model="formServer.username" id="username" name="username" autocomplete="on"
+              style="width: 350px;" />
+          </el-form-item>
+        </el-row>
+        <el-row>
+          <el-form-item label="Password" prop="password" :rules="{
+            required: true,
+            message: 'Password is required',
+            trigger: 'blur',
+          }">
+            <el-input v-model="formServer.password" id="password" name="password" type="password" show-password
+              style="width: 350px;" />
+          </el-form-item>
+        </el-row>
+      </template>
       <el-row>
         <el-form-item>
           <div class="button_right">
-            <el-button type="primary" @click="connectServerSubmit(formSRef)">Connect
-              Server</el-button>
+            <el-input type="submit" @click="connectServerSubmit(formSRef)" value="Connect Server" />
           </div>
         </el-form-item>
         <div class="float_right">
           <ClearCacheButton />
         </div>
       </el-row>
-
     </el-form>
-
   </el-card>
-
-  <el-dialog v-model="config.dialogFormVisible" title="Get API Key By email and password">
+  <el-dialog v-if="formServer.connection_type === 'chirpstack'" v-model="config.dialogFormVisible"
+    title="Get API Key By email and password">
     <el-form @submit.prevent :model="formLogin" label-width="120px">
       <el-form-item label="Email" required>
         <el-input v-model="formLogin.email" id="email" name="email" autocomplete="on" />
@@ -95,6 +123,7 @@ import { getSet, lsave } from '@/js/localstore';
 import { request } from "@/js/request";
 import { Key } from '@element-plus/icons-vue';
 import type { FormInstance } from 'element-plus';
+import { ElMessageBox } from 'element-plus';
 import { reactive, ref } from 'vue';
 import ClearCacheButton from './ClearCacheButton.vue';
 const emit = defineEmits(["connectServer"]);
@@ -118,14 +147,35 @@ request('v1/template/list', "GET").then((resp) => {
   }
   initModel()
 }, (err) => {
-  alert("device template load error:" + err)
+  let error_message = err
+  if (err.response) {
+    error_message = err.response.data.err_msg
+  }
+  ElMessageBox.alert(error_message, 'Request failed!', {
+    confirmButtonText: 'OK',
+    dangerouslyUseHTMLString: true,
+    type: "error",
+  })
 })
 
+const connection_options = [
+  {
+    value: 'chirpstack',
+    label: 'Chirpstack',
+  },
+  {
+    value: 'rockblock',
+    label: 'RockBLOCK',
+  },
+]
 
 const formServer = reactive({
   device_template: '',
   server_url: '',
-  api_key: ''
+  api_key: '',
+  connection_type: 'chirpstack',
+  username: '',
+  password: '',
 })
 const formLogin = reactive({
   server_url: '',
@@ -136,6 +186,7 @@ const formLogin = reactive({
 const initModel = () => {
   getSet('formServer', formServer)
   getSet('formLogin', formLogin)
+  emit('connectServer', formServer, config, available_devices, deviceTemplates)
 }
 
 const config = reactive({
@@ -150,32 +201,73 @@ const userLogin = () => {
     config.dialogFormVisible = false
     lsave('formLogin', formLogin)
   }, (err) => {
-    alert(err)
+    let error_message = err
+    if (err.response) {
+      error_message = err.response.data.err_msg
+    }
+    ElMessageBox.alert(error_message, 'Request failed!', {
+      confirmButtonText: 'OK',
+      dangerouslyUseHTMLString: true,
+      type: "error",
+    })
   })
 }
-var orgList = new Array;
-const changeTemplate = () => {
-  emit('connectServer', formServer, config, orgList, deviceTemplates)
+
+const reset_onnection = () => {
+  config.connected = false
+  emit('connectServer', formServer, config, available_devices, deviceTemplates)
 }
+
+var available_devices = new Array;
 const connectServerSubmit = (formEl) => {
   if (!formEl) return
   formEl.validate((valid) => {
     if (valid) {
-      let data = {}
-      data['server_url'] = formServer.server_url
-      data['api_key'] = formServer.api_key
-      data['list_type'] = 'org'
-      request('v1/list', 'POST', data).then((resp) => {
-        orgList = []
-        for (var i = 0; i < resp.length; i++) {
-          orgList.push({ "id": resp[i].id, "name": resp[i].name })
-        }
-        config.connected = true
-        lsave('formServer', formServer)
-        emit('connectServer', formServer, config, orgList, deviceTemplates)
-      }, (err) => {
-        alert(err)
-      })
+      if (formServer.connection_type === 'rockblock') {
+        let data = {}
+        data['username'] = formServer.username
+        data['password'] = formServer.password
+
+        request('v1/rockblock/login', 'POST', data).then((resp) => {
+          config.connected = true
+          emit('connectServer', formServer, config, available_devices, deviceTemplates)
+          lsave('formServer', formServer)
+        }, (err) => {
+          let error_message = err
+          if (err.response) {
+            error_message = err.response.data.err_msg
+          }
+          ElMessageBox.alert(error_message, 'Request failed!', {
+            confirmButtonText: 'OK',
+            dangerouslyUseHTMLString: true,
+            type: "error",
+          })
+        })
+      } else if (formServer.connection_type === 'chirpstack') {
+        let data = {}
+        data['server_url'] = formServer.server_url
+        data['api_key'] = formServer.api_key
+        data['list_type'] = 'org'
+        request('v1/list', 'POST', data).then((resp) => {
+          available_devices = []
+          for (var i = 0; i < resp.length; i++) {
+            available_devices.push({ "id": resp[i].id, "name": resp[i].name })
+          }
+          config.connected = true
+          lsave('formServer', formServer)
+          emit('connectServer', formServer, config, available_devices, deviceTemplates)
+        }, (err) => {
+          let error_message = err
+          if (err.response) {
+            error_message = err.response.data.err_msg
+          }
+          ElMessageBox.alert(error_message, 'Request failed!', {
+            confirmButtonText: 'OK',
+            dangerouslyUseHTMLString: true,
+            type: "error",
+          })
+        })
+      }
     } else {
       return false
     }

@@ -1,19 +1,19 @@
 {
     "fw_version": {
-        "type": "rangeredge_tracker",
-        "major": "3",
-        "minor": "2"
+        "type": "rhinopuck_tracker",
+        "major": "2",
+        "minor": "15"
     },
     "hardware": {
-        "type": "rangeredge_nrf52840",
+        "type": "rhinopuck35_nrf52840",
         "version": {
             "major": "1",
-            "minor": "4"
+            "minor": "1"
         }
     },
     "settings": {
         "port": "port_settings",
-        "type": "rangeredge_tracker",
+        "type": "rhinopuck_tracker",
         "lr_gps_interval": {
             "id": "0x01",
             "enabled": true,
@@ -44,7 +44,7 @@
         "satellite_send_interval": {
             "id": "0x04",
             "enabled": true,
-            "default": 86400,
+            "default": 0,
             "min": 0,
             "max": 86400,
             "length": 4,
@@ -116,7 +116,7 @@
         "lr_send_flag": {
             "id": "0x0C",
             "enabled": true,
-            "default": 4227859967,
+            "default": 4227860079,
             "min": 0,
             "max": 4294967295,
             "length": 4,
@@ -125,7 +125,7 @@
         "flash_store_flag": {
             "id": "0x0D",
             "enabled": true,
-            "default": 67110683,
+            "default": 67110511,
             "min": 0,
             "max": 4294967295,
             "length": 4,
@@ -215,7 +215,7 @@
         "hot_fix_timeout": {
             "id": "0x17",
             "enabled": true,
-            "default": 45,
+            "default": 65,
             "min": 1,
             "max": 600,
             "length": 2,
@@ -332,7 +332,7 @@
         "gps_backoff_factor": {
             "id": "0x25",
             "enabled": true,
-            "default": 15,
+            "default": 10,
             "min": 10,
             "max": 100,
             "length": 1,
@@ -449,7 +449,7 @@
         "lr_messaging_retry_count": {
             "id": "0x32",
             "enabled": true,
-            "default": 2,
+            "default": 1,
             "min": 1,
             "max": 5,
             "length": 1,
@@ -476,7 +476,7 @@
         "rejoin_interval": {
             "id": "0x35",
             "enabled": true,
-            "default": 43200,
+            "default": 3600,
             "min": 600,
             "max": 86400,
             "length": 4,
@@ -499,69 +499,6 @@
             "max": 3,
             "length": 1,
             "conversion": "uint8"
-        },
-        "rf_scan_enabled": {
-            "id": "0x38",
-            "enabled": true,
-            "default": false,
-            "min": false,
-            "max": true,
-            "length": 1,
-            "conversion": "bool"
-        },
-        "sat_send_flag": {
-            "id": "0x39",
-            "enabled": true,
-            "default": 138,
-            "min": 0,
-            "max": 4294967295,
-            "length": 4,
-            "conversion": "uint32"
-        },
-        "satellite_enabled": {
-            "id": "0x3A",
-            "enabled": true,
-            "default": false,
-            "min": false,
-            "max": true,
-            "length": 1,
-            "conversion": "bool"
-        },
-        "satellite_retry": {
-            "id": "0x3B",
-            "enabled": true,
-            "default": 10,
-            "min": 1,
-            "max": 15,
-            "length": 1,
-            "conversion": "uint8"
-        },
-        "rf_scan_interval": {
-            "id": "0x3C",
-            "enabled": true,
-            "default": 60,
-            "min": 30,
-            "max": 86400,
-            "length": 4,
-            "conversion": "uint32"
-        },
-        "rf_scan_duration": {
-            "id": "0x3D",
-            "enabled": true,
-            "default": 60,
-            "min": 0,
-            "max": 86400,
-            "length": 4,
-            "conversion": "uint32"
-        },
-        "rf_scan_config": {
-            "id": "0x3E",
-            "enabled": true,
-            "default": "{0x01, 0x0e, 0x0a, 0x0a, 0x70, 0x03, 0x93, 0x03, 0x14, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}",
-            "min": "{}",
-            "max": "{}",
-            "length": 46,
-            "conversion": "byte_array"
         }
     },
     "commands": {
@@ -664,7 +601,7 @@
         },
         "cmd_get_rf_scan": {
             "id": "0xB0",
-            "length": 16,
+            "length": 12,
             "conversion": "uint32",
             "value": 0
         },
@@ -788,15 +725,15 @@
             "conversion": "uint8",
             "value": 0
         },
-        "cmd_send_sat_buffer": {
-            "id": "0xC6",
+        "cmd_single_bt_scan": {
+            "id": "0xC8",
             "length": 0,
             "conversion": "uint8",
             "value": 0
         },
-        "cmd_pause_rf_scan": {
-            "id": "0xC7",
-            "length": 1,
+        "cmd_aggregated_bt_scan": {
+            "id": "0xC9",
+            "length": 0,
             "conversion": "uint8",
             "value": 0
         }
@@ -1072,15 +1009,6 @@
             "max": "",
             "length": 8,
             "conversion": "string"
-        },
-        "satellite_resend_try": {
-            "id": "0xEF",
-            "enabled": true,
-            "default": 0,
-            "min": 0,
-            "max": 30,
-            "length": 1,
-            "conversion": "uint8"
         }
     },
     "messages": {

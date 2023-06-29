@@ -52,15 +52,7 @@ func Resp(writer http.ResponseWriter, result interface{}, err error) {
 		resp.Code = 500
 		resp.ErrMsg = err.Error()
 		log.Println("[error] server error", err)
+		writer.WriteHeader(resp.Code)
 		json.NewEncoder(writer).Encode(resp)
 	}
-
-}
-
-func Succ(writer http.ResponseWriter, result interface{}) {
-	Resp(writer, result, nil)
-}
-
-func Err(write http.ResponseWriter, err error) {
-	Resp(write, nil, err)
 }
