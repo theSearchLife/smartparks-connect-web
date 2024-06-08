@@ -15,3 +15,7 @@ To work on the front end the best way is to run the development version of the f
 ```cd public && npm run dev```. Frontend will be running on http://localhost:5173/
 
 To build frontend for production run ```cd public && npm install && npm run build```
+
+
+
+This project is tested with BrowserStack.
